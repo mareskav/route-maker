@@ -1,10 +1,15 @@
+import { MainMap } from "@/components/MainMap.tsx"
 import { TopBar } from "@/components/TopBar"
 
-export default function App() {
+const App = () => {
   return (
-    <div className="min-h-dvh">
+    <div className="h-screen flex flex-col overflow-hidden">
       <TopBar />
-      <main className="p-6">…</main>
+      <div className="flex-1">
+        <MainMap />
+      </div>
     </div>
   )
 }
+
+export default App
