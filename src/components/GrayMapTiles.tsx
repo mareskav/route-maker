@@ -15,15 +15,13 @@ export const GrayMapTiles = ({ enabled = true }: Props) => {
   const map = useMap()
 
   useEffect(() => {
-    const tilePane = map.getContainer().querySelector<HTMLElement>(".leaflet-tile-pane")
-    if (!tilePane) return
+    const pane = map.getPane("tilePane")
+    if (!pane) return
 
     if (enabled) {
-      tilePane.style.filter = "grayscale(100%)"
-      // případně ještě: tilePane.style.opacity = "0.9"
+      pane.style.filter = "grayscale(100%)"
     } else {
-      tilePane.style.filter = ""
-      tilePane.style.opacity = ""
+      pane.style.filter = ""
     }
   }, [map, enabled])
 

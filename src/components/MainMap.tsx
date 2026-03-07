@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react"
-import { MapContainer, TileLayer } from "react-leaflet"
+import { MapContainer, TileLayer, useMap } from "react-leaflet"
 
 import { GrayMapTiles } from "@/components/GrayMapTiles.tsx"
-import { MapyInternalTrailOverlay } from "@/components/MapyHybridTuristOverlay.tsx"
+import { TouristOverlay } from "@/components/TouristOverlay.tsx"
 
 type TileJson = {
   tiles: string[]
@@ -15,6 +15,19 @@ type TileJson = {
 const CENTER: [number, number] = [49.502485, 15.5886289]
 const ZOOM = 14
 const MAPSET = "basic" // basic | outdoor | aerial | names-overlay | winter
+
+export const MapPanes = () => {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!map.getPane("touristPane")) {
+      const pane = map.createPane("touristPane")
+      pane.style.zIndex = "450"
+    }
+  }, [map])
+
+  return null
+}
 
 export const MainMap = () => {
   const apiKey = import.meta.env.VITE_MAPY_API_KEY as string
@@ -56,6 +69,7 @@ export const MainMap = () => {
   return (
     // @ts-ignore
     <MapContainer center={CENTER} zoom={ZOOM} className="h-full w-full">
+      <MapPanes />
       <TileLayer
         url={tileUrl}
         // @ts-ignore
@@ -63,8 +77,9 @@ export const MainMap = () => {
         {...(tileJson.minZoom && { minZoom: tileJson.minZoom })}
         {...(tileJson.maxZoom && { maxZoom: tileJson.maxZoom })}
       />
-      <MapyInternalTrailOverlay enabled opacity={1} />
-      {/*<GrayMapTiles enabled />*/}
+      <TouristOverlay enabled />
+
+      <GrayMapTiles enabled />
       {/*<Polyline positions={routeLatLngs} />*/}
     </MapContainer>
   )
