@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { MapContainer, TileLayer } from "react-leaflet"
 
 import { GrayMapTiles } from "@/components/GrayMapTiles.tsx"
+import { MapyInternalTrailOverlay } from "@/components/MapyHybridTuristOverlay.tsx"
 
 type TileJson = {
   tiles: string[]
@@ -13,7 +14,7 @@ type TileJson = {
 // Štoky is default
 const CENTER: [number, number] = [49.502485, 15.5886289]
 const ZOOM = 14
-const MAPSET = "outdoor" // basic | outdoor | aerial | names-overlay | winter
+const MAPSET = "basic" // basic | outdoor | aerial | names-overlay | winter
 
 export const MainMap = () => {
   const apiKey = import.meta.env.VITE_MAPY_API_KEY as string
@@ -62,8 +63,8 @@ export const MainMap = () => {
         {...(tileJson.minZoom && { minZoom: tileJson.minZoom })}
         {...(tileJson.maxZoom && { maxZoom: tileJson.maxZoom })}
       />
-      <GrayMapTiles enabled />
-
+      <MapyInternalTrailOverlay enabled opacity={1} />
+      {/*<GrayMapTiles enabled />*/}
       {/*<Polyline positions={routeLatLngs} />*/}
     </MapContainer>
   )
