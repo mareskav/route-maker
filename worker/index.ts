@@ -1,5 +1,11 @@
+interface Env {}
+
 export default {
-  async fetch(request: Request, env: unknown, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, _env: Env, ctx: ExecutionContext): Promise<Response> {
+    if (request.method !== "GET") {
+      return new Response("Method not allowed", { status: 405 })
+    }
+
     const url = new URL(request.url)
 
     const match = url.pathname.match(/^\/api\/touristOverlay\/(\d+)\/(\d+)\/(\d+)$/)
@@ -9,12 +15,12 @@ export default {
 
     const [, z, x, y] = match
 
-    if (!/^\d+$/.test(z) || !/^\d+$/.test(x) || !/^\d+$/.test(y)) {
-      return new Response("Invalid tile coordinates", { status: 400 })
-    }
+    const cacheUrl = new URL(request.url)
+    cacheUrl.search = ""
 
-    const cache = caches.default
-    const cacheKey = new Request(url.toString(), request)
+    const workerCaches = caches as typeof caches & { default: Cache }
+    const cache = workerCaches.default
+    const cacheKey = new Request(cacheUrl.toString(), { method: "GET" })
 
     const cached = await cache.match(cacheKey)
     if (cached) {
@@ -51,8 +57,10 @@ export default {
       })
     }
 
-    const headers = new Headers(upstream.headers)
+    const headers = new Headers()
+    headers.set("Content-Type", upstream.headers.get("Content-Type") ?? "image/png")
     headers.set("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800, immutable")
+    headers.set("Access-Control-Allow-Origin", "*")
     headers.set("X-RouteMaker-Cache", "MISS")
 
     const response = new Response(upstream.body, {

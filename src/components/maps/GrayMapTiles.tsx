@@ -3,7 +3,6 @@ import { useMap } from "react-leaflet"
 
 type Props = {
   enabled?: boolean
-  // můžeš doladit intenzitu bez magie v kódu
   opacity?: number // default 0.7..0.9
   grayscale?: number // 0..1
   brightness?: number // 0..2 (1 = bez změny)

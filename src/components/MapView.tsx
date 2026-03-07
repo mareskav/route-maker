@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react"
-import { MapContainer, TileLayer, useMap } from "react-leaflet"
+import { MapContainer, Polyline, TileLayer } from "react-leaflet"
 
-import { GrayMapTiles } from "@/components/GrayMapTiles.tsx"
-import { TouristOverlay } from "@/components/TouristOverlay.tsx"
+import { GrayMapTiles } from "@/components/maps/GrayMapTiles.tsx"
+import { TouristOverlay } from "@/components/maps/TouristOverlay.tsx"
+import { MapPanes } from "@/components/maps/MapPanes.tsx"
+import { MapInteractions } from "@/components/routes/MapInteractions.tsx"
 
 type TileJson = {
   tiles: string[]
@@ -16,24 +18,17 @@ const CENTER: [number, number] = [49.502485, 15.5886289]
 const ZOOM = 14
 const MAPSET = "basic" // basic | outdoor | aerial | names-overlay | winter
 
-export const MapPanes = () => {
-  const map = useMap()
-
-  useEffect(() => {
-    if (!map.getPane("touristPane")) {
-      const pane = map.createPane("touristPane")
-      pane.style.zIndex = "450"
-    }
-  }, [map])
-
-  return null
+type Props = {
+  routingEnabled: boolean
 }
 
-export const MainMap = () => {
+export const MapView = ({ routingEnabled }: Props) => {
   const apiKey = import.meta.env.VITE_MAPY_API_KEY as string
 
   const [tileJson, setTileJson] = useState<TileJson | null>(null)
   const [err, setErr] = useState<string | null>(null)
+
+  const [routePoints, setRoutePoints] = useState<[number, number][]>([])
 
   const tileJsonUrl = useMemo(() => {
     return `https://api.mapy.com/v1/maptiles/${MAPSET}/tiles.json?apikey=${encodeURIComponent(apiKey)}`
@@ -49,16 +44,26 @@ export const MainMap = () => {
       try {
         setErr(null)
         const res = await fetch(tileJsonUrl)
-        if (!res.ok) throw new Error(`TileJSON fetch failed: ${res.status} ${res.statusText}`)
+        if (!res.ok) {
+          throw new Error(`TileJSON fetch failed: ${res.status} ${res.statusText}`)
+        }
+
         const data = (await res.json()) as TileJson
 
-        if (!data.tiles?.length) throw new Error("TileJSON neobsahuje pole tiles[]")
+        if (!data.tiles?.length) {
+          throw new Error("TileJSON neobsahuje pole tiles[]")
+        }
+
         setTileJson(data)
-      } catch (e: any) {
-        setErr(e?.message ?? String(e))
+      } catch (e: unknown) {
+        setErr(e instanceof Error ? e.message : String(e))
       }
     })()
   }, [apiKey, tileJsonUrl])
+
+  const handleAddRoutePoint = (lat: number, lng: number) => {
+    setRoutePoints((prev) => [...prev, [lat, lng]])
+  }
 
   if (err) return <div style={{ padding: 16 }}>❌ {err}</div>
   if (!tileJson) return <div style={{ padding: 16 }}>Načítám mapu…</div>
@@ -67,20 +72,21 @@ export const MainMap = () => {
   const attribution = tileJson.attribution ?? ""
 
   return (
-    // @ts-ignore
     <MapContainer center={CENTER} zoom={ZOOM} className="h-full w-full">
       <MapPanes />
+      <MapInteractions routingEnabled={routingEnabled} onAddRoutePoint={handleAddRoutePoint} />
+
       <TileLayer
         url={tileUrl}
-        // @ts-ignore
         attribution={attribution}
-        {...(tileJson.minZoom && { minZoom: tileJson.minZoom })}
-        {...(tileJson.maxZoom && { maxZoom: tileJson.maxZoom })}
+        minZoom={tileJson.minZoom}
+        maxZoom={tileJson.maxZoom}
       />
-      <TouristOverlay enabled />
 
+      <TouristOverlay enabled />
       <GrayMapTiles enabled />
-      {/*<Polyline positions={routeLatLngs} />*/}
+
+      {routePoints.length > 1 && <Polyline positions={routePoints} />}
     </MapContainer>
   )
 }

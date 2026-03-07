@@ -1,12 +1,15 @@
-import { MainMap } from "@/components/MainMap.tsx"
-import { TopBar } from "@/components/TopBar"
+import { MapView } from "@/components/MapView.tsx"
+import { HeaderBar } from "@/components/HeaderBar.tsx"
+import { useState } from "react"
 
 const App = () => {
+  const [routingEnabled, setRoutingEnabled] = useState(false)
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <TopBar />
+      <HeaderBar routingEnabled={routingEnabled} setRoutingEnabled={setRoutingEnabled} />
       <div className="flex-1">
-        <MainMap />
+        <MapView routingEnabled={routingEnabled} />
       </div>
     </div>
   )

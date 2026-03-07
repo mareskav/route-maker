@@ -7,5 +7,6 @@ type Props = {
 export const TouristOverlay = ({ enabled = true }: Props) => {
   if (!enabled) return null
 
+  // @ts-ignore
   return <TileLayer url="/api/touristOverlay/{z}/{x}/{y}" pane="touristPane" keepBuffer={4} />
 }
