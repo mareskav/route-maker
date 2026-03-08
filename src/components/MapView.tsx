@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { MapContainer, Polyline, TileLayer } from "react-leaflet"
+import { CircleMarker, MapContainer, Polyline, TileLayer } from "react-leaflet"
 
 import { GrayMapTiles } from "@/components/maps/GrayMapTiles.tsx"
 import { TouristOverlay } from "@/components/maps/TouristOverlay.tsx"
@@ -65,7 +65,11 @@ export const MapView = ({ routingEnabled }: Props) => {
     setRoutePoints((prev) => [...prev, [lat, lng]])
   }
 
-  if (err) return <div style={{ padding: 16 }}>❌ {err}</div>
+  const handleRemoveRoutePoint = (index: number) => {
+    setRoutePoints((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  if (err) return <div style={{ padding: 16 }}>Error {err}</div>
   if (!tileJson) return <div style={{ padding: 16 }}>Načítám mapu…</div>
 
   const tileUrl = tileJson.tiles[0]
@@ -86,7 +90,24 @@ export const MapView = ({ routingEnabled }: Props) => {
       <TouristOverlay enabled />
       <GrayMapTiles enabled />
 
-      {routePoints.length > 1 && <Polyline positions={routePoints} />}
+      {routePoints.length > 1 && <Polyline positions={routePoints} weight={4} opacity={0.9} />}
+
+      {routePoints.map((point, index) => (
+        <CircleMarker
+          key={index}
+          center={point}
+          radius={index === 0 ? 7 : 5}
+          eventHandlers={{
+            click: (e) => {
+              e.originalEvent.stopPropagation()
+              handleRemoveRoutePoint(index)
+            },
+            mouseover: (e) => {
+              e.target._path.style.cursor = "pointer"
+            }
+          }}
+        />
+      ))}
     </MapContainer>
   )
 }
