@@ -32,6 +32,7 @@ export function RoutePlanner({
   const [points, setPoints] = useState<LatLngLiteral[]>([])
   const [routedPoints, setRoutedPoints] = useState<LatLngLiteral[]>([])
   const [routeGeoJson, setRouteGeoJson] = useState<GeoJSON.GeoJsonObject | null>(null)
+  const routeKey = points.map((point) => `${point.lat},${point.lng}`).join("|")
 
   // Když planner vypneš, mapu “ukliď”
   useEffect(() => {
@@ -56,6 +57,8 @@ export function RoutePlanner({
     }
 
     const controller = new AbortController()
+    setRouteGeoJson(null)
+    setRoutedPoints([])
 
     ;(async () => {
       try {
@@ -91,7 +94,7 @@ export function RoutePlanner({
 
       {enabled && routeGeoJson && (
         <LeafletGeoJSON
-          key={`route-${points.length}`}
+          key={`route-${routeKey}`}
           data={routeGeoJson}
           style={() => ({
             weight: 5,

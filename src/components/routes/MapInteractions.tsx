@@ -22,7 +22,7 @@ export const MapInteractions = ({ routeClickMode, onAddRoutePoint }: Props) => {
 
   useMapEvents({
     click(e: LeafletMouseEvent) {
-      if (routeClickMode !== "free") return
+      if (!["road", "free"].includes(routeClickMode)) return
 
       onAddRoutePoint(e.latlng.lat, e.latlng.lng)
     }

@@ -56,7 +56,9 @@ const toRouteFeatures = (geometry: unknown): GeoJSON.Feature[] => {
   ]
 }
 
-const buildRouteUrl = (apiKey: string, routeType: RouteType, start: LatLngLiteral, end: LatLngLiteral) => {
+const buildRouteUrl = (apiKey: string, routeType: RouteType, points: LatLngLiteral[]) => {
+  const start = points[0]
+  const end = points[points.length - 1]
   const url = new URL("https://api.mapy.com/v1/routing/route")
   url.searchParams.set("apikey", apiKey)
   url.searchParams.set("routeType", routeType)
@@ -65,13 +67,16 @@ const buildRouteUrl = (apiKey: string, routeType: RouteType, start: LatLngLitera
   // API chce "lon,lat"; Leaflet drží body jako lat/lng.
   url.searchParams.set("start", `${start.lng},${start.lat}`)
   url.searchParams.set("end", `${end.lng},${end.lat}`)
+  points.slice(1, -1).forEach((point) => {
+    url.searchParams.append("waypoints", `${point.lng},${point.lat}`)
+  })
 
   return url
 }
 
 const toMappedSegmentPoints = (
   routePoints: RoutePointResponse[] | undefined,
-  fallback: [LatLngLiteral, LatLngLiteral]
+  fallback: LatLngLiteral[]
 ) => {
   const mappedPoints =
     routePoints
@@ -79,6 +84,37 @@ const toMappedSegmentPoints = (
       .filter((point): point is LatLngLiteral => Boolean(point)) ?? []
 
   return mappedPoints.length === fallback.length ? mappedPoints : fallback
+}
+
+async function fetchRouteChunk({
+  apiKey,
+  routeType,
+  points,
+  signal
+}: {
+  apiKey: string
+  routeType: RouteType
+  points: LatLngLiteral[]
+  signal: AbortSignal
+}): Promise<RoutingResult> {
+  const url = buildRouteUrl(apiKey, routeType, points)
+  const res = await fetch(url.toString(), { signal })
+  if (!res.ok) throw new Error(`Routing failed: ${res.status} ${res.statusText}`)
+
+  const data = (await res.json()) as RouteResponse
+  const features = toRouteFeatures(data.geometry)
+  if (!features.length) {
+    throw new Error("Routing response does not contain valid GeoJSON geometry")
+  }
+
+  return {
+    geoJson: {
+      type: "FeatureCollection",
+      features
+    },
+    lengthMeters: data.length ?? 0,
+    mappedPoints: toMappedSegmentPoints(data.routePoints, points)
+  }
 }
 
 export async function fetchRoute({
@@ -92,27 +128,23 @@ export async function fetchRoute({
   points: LatLngLiteral[]
   signal: AbortSignal
 }): Promise<RoutingResult> {
+  const maxPointsPerRequest = 17
+
+  if (points.length <= maxPointsPerRequest) {
+    return fetchRouteChunk({ apiKey, routeType, points, signal })
+  }
+
   const features: GeoJSON.Feature[] = []
   const mappedPoints: LatLngLiteral[] = []
   let lengthMeters = 0
 
-  for (let i = 0; i < points.length - 1; i++) {
-    const segment: [LatLngLiteral, LatLngLiteral] = [points[i], points[i + 1]]
-    const url = buildRouteUrl(apiKey, routeType, segment[0], segment[1])
-    const res = await fetch(url.toString(), { signal })
-    if (!res.ok) throw new Error(`Routing segment ${i + 1} failed: ${res.status} ${res.statusText}`)
+  for (let startIndex = 0; startIndex < points.length - 1; startIndex += maxPointsPerRequest - 1) {
+    const chunk = points.slice(startIndex, startIndex + maxPointsPerRequest)
+    const route = await fetchRouteChunk({ apiKey, routeType, points: chunk, signal })
 
-    const data = (await res.json()) as RouteResponse
-    const segmentFeatures = toRouteFeatures(data.geometry)
-    if (!segmentFeatures.length) {
-      throw new Error(`Routing segment ${i + 1} response does not contain valid GeoJSON geometry`)
-    }
-
-    const segmentMappedPoints = toMappedSegmentPoints(data.routePoints, segment)
-
-    features.push(...segmentFeatures)
-    lengthMeters += data.length ?? 0
-    mappedPoints.push(...(i === 0 ? segmentMappedPoints : segmentMappedPoints.slice(1)))
+    features.push(...route.geoJson.features)
+    lengthMeters += route.lengthMeters
+    mappedPoints.push(...(startIndex === 0 ? route.mappedPoints : route.mappedPoints.slice(1)))
   }
 
   return {
