@@ -123,30 +123,106 @@
   }
 }
 
+.route-map-browse,
+.route-map-browse .leaflet-grab,
+.route-map-browse .leaflet-interactive {
+  cursor: default;
+}
+
+.route-map-browse.leaflet-dragging,
+.route-map-browse.leaflet-dragging .leaflet-grab,
+.route-map-browse.leaflet-dragging .leaflet-interactive {
+  cursor: grabbing;
+}
+
+.route-map-draw,
+.route-map-draw .leaflet-grab,
+.route-map-draw .leaflet-interactive {
+  cursor: crosshair;
+}
+
+.leaflet-control-scale {
+  margin-bottom: 18px !important;
+  margin-left: 14px !important;
+}
+
+.leaflet-control-scale-line {
+  position: relative;
+  height: 12px;
+  overflow: visible;
+  border: 0;
+  border-bottom: 4px solid #111827;
+  border-left: 2px solid #111827;
+  border-right: 2px solid #111827;
+  background: transparent;
+  color: #111827;
+  padding: 0 0 5px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: right;
+  text-shadow:
+    -1px -1px 0 white,
+    1px -1px 0 white,
+    -1px 1px 0 white,
+    1px 1px 0 white;
+  box-shadow: none;
+}
+
+.leaflet-control-scale-line:not(:first-child) {
+  display: none;
+}
+
 .route-point-marker {
   position: relative;
   display: block;
-  width: 25px;
-  height: 41px;
-  background-image: url("https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png");
-  background-repeat: no-repeat;
-  background-size: 25px 41px;
-  cursor: pointer;
+  width: 30px;
+  height: 49px;
+  cursor: grab;
+}
+
+.leaflet-marker-draggable:active .route-point-marker {
+  cursor: grabbing;
+}
+
+.route-point-marker svg {
+  display: block;
+  width: 30px;
+  height: 49px;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 45%));
 }
 
 .route-point-marker span {
   position: absolute;
-  top: 4px;
+  top: 5px;
   left: 50%;
   display: grid;
-  width: 17px;
-  height: 17px;
+  width: 20px;
+  height: 20px;
   place-items: center;
   border-radius: 999px;
-  background: white;
-  color: #1d4ed8;
-  font-size: 11px;
+  color: #111827;
+  font-size: 12px;
   font-weight: 800;
   line-height: 1;
   transform: translateX(-50%);
+}
+
+.route-color-picker {
+  width: 100% !important;
+  height: 130px !important;
+}
+
+.route-color-picker .react-colorful__saturation {
+  border-radius: 6px 6px 0 0;
+}
+
+.route-color-picker .react-colorful__hue {
+  height: 18px;
+  border-radius: 0 0 6px 6px;
+}
+
+.route-color-picker .react-colorful__pointer {
+  width: 18px;
+  height: 18px;
 }

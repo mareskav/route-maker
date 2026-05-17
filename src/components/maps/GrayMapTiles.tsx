@@ -3,11 +3,6 @@ import { useMap } from "react-leaflet"
 
 type Props = {
   enabled?: boolean
-  opacity?: number // default 0.7..0.9
-  grayscale?: number // 0..1
-  brightness?: number // 0..2 (1 = bez změny)
-  contrast?: number // 0..2
-  saturate?: number // 0..2
 }
 
 export const GrayMapTiles = ({ enabled = true }: Props) => {
@@ -17,11 +12,7 @@ export const GrayMapTiles = ({ enabled = true }: Props) => {
     const pane = map.getPane("tilePane")
     if (!pane) return
 
-    if (enabled) {
-      pane.style.filter = "grayscale(100%)"
-    } else {
-      pane.style.filter = ""
-    }
+    pane.style.filter = enabled ? "grayscale(100%) contrast(1.08) brightness(0.96)" : ""
   }, [map, enabled])
 
   return null

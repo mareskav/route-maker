@@ -9,12 +9,15 @@ import importPlugin from "eslint-plugin-import"
 import prettier from "eslint-config-prettier"
 
 export default [
+  {
+    ignores: ["dist/**", ".wrangler/**", "node_modules/**"]
+  },
+
   js.configs.recommended,
 
   // TS/TSX
   {
     files: ["**/*.{ts,tsx}"],
-    ignores: ["dist/**"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
@@ -51,9 +54,17 @@ export default [
       "react-hooks/exhaustive-deps": "warn",
 
       // Vite fast refresh: export component-only (chrání HMR)
-      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      "react-refresh/only-export-components": [
+        "warn",
+        {
+          allowConstantExport: true,
+          allowExportNames: ["buttonVariants", "toggleVariants"]
+        }
+      ],
 
       // TS sanity
+      "no-undef": "off",
+      "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
 
       // Import hygiene (volitelně přísnější)

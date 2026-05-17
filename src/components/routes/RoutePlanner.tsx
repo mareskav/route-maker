@@ -1,7 +1,7 @@
 import type { LatLngLiteral } from "leaflet"
+import L from "leaflet"
 import { useEffect, useState } from "react"
 import { GeoJSON as LeafletGeoJSON } from "react-leaflet"
-import L from "leaflet"
 
 import { ClickToAddPoint } from "@/components/routes/ClickToAddPoint.tsx"
 import { RoutePointMarker } from "@/components/routes/RoutePointMarker.tsx"
