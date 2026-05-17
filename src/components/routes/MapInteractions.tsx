@@ -1,26 +1,28 @@
 import { useEffect } from "react"
 import { useMap, useMapEvents } from "react-leaflet"
+import type { RouteClickMode } from "@/components/HeaderBar.tsx"
+import type { LeafletMouseEvent } from "leaflet"
 
 type Props = {
-  routingEnabled: boolean
+  routeClickMode: RouteClickMode
   onAddRoutePoint: (lat: number, lng: number) => void
 }
 
-export const MapInteractions = ({ routingEnabled, onAddRoutePoint }: Props) => {
+export const MapInteractions = ({ routeClickMode, onAddRoutePoint }: Props) => {
   const map = useMap()
 
   useEffect(() => {
     const el = map.getContainer()
-    el.style.cursor = routingEnabled ? "crosshair" : ""
+    el.style.cursor = routeClickMode === "free" ? "crosshair" : ""
 
     return () => {
       el.style.cursor = ""
     }
-  }, [map, routingEnabled])
+  }, [map, routeClickMode])
 
   useMapEvents({
-    click(e) {
-      if (!routingEnabled) return
+    click(e: LeafletMouseEvent) {
+      if (routeClickMode === "none") return
 
       onAddRoutePoint(e.latlng.lat, e.latlng.lng)
     }

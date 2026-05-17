@@ -5,6 +5,8 @@ import { GrayMapTiles } from "@/components/maps/GrayMapTiles.tsx"
 import { TouristOverlay } from "@/components/maps/TouristOverlay.tsx"
 import { MapPanes } from "@/components/maps/MapPanes.tsx"
 import { MapInteractions } from "@/components/routes/MapInteractions.tsx"
+import type { RouteClickMode } from "@/components/HeaderBar.tsx"
+import { RoutePlanner } from "@/components/routes/RoutePlanner.tsx"
 
 type TileJson = {
   tiles: string[]
@@ -19,10 +21,11 @@ const ZOOM = 14
 const MAPSET = "basic" // basic | outdoor | aerial | names-overlay | winter
 
 type Props = {
-  routingEnabled: boolean
+  routeClickMode: RouteClickMode
+  onRouteLengthMetersChange: (meters: number) => void
 }
 
-export const MapView = ({ routingEnabled }: Props) => {
+export const MapView = (props: Props) => {
   const apiKey = import.meta.env.VITE_MAPY_API_KEY as string
 
   const [tileJson, setTileJson] = useState<TileJson | null>(null)
@@ -78,7 +81,10 @@ export const MapView = ({ routingEnabled }: Props) => {
   return (
     <MapContainer center={CENTER} zoom={ZOOM} className="h-full w-full">
       <MapPanes />
-      <MapInteractions routingEnabled={routingEnabled} onAddRoutePoint={handleAddRoutePoint} />
+      <MapInteractions
+        routeClickMode={props.routeClickMode === "free" ? props.routeClickMode : "none"}
+        onAddRoutePoint={handleAddRoutePoint}
+      />
 
       <TileLayer
         url={tileUrl}
@@ -108,6 +114,13 @@ export const MapView = ({ routingEnabled }: Props) => {
           }}
         />
       ))}
+
+      <RoutePlanner
+        apiKey={apiKey}
+        enabled={props.routeClickMode === "road"}
+        routeType="foot_hiking"
+        onLengthMetersChange={props.onRouteLengthMetersChange}
+      />
     </MapContainer>
   )
 }

@@ -1,6 +1,6 @@
 import type { LatLngLiteral } from "leaflet"
 import { useEffect, useState } from "react"
-import { GeoJSON, Marker, useMapEvents } from "react-leaflet"
+import { GeoJSON as LeafletGeoJSON, Marker, useMapEvents } from "react-leaflet"
 import L from "leaflet"
 
 // Fix pro defaultní Leaflet marker ikony
@@ -21,7 +21,29 @@ type Props = {
 type RouteResponse = {
   length: number // meters
   duration: number // seconds
-  geometry: GeoJSON.Geometry // LineString
+  geometry: unknown
+}
+
+const toRouteGeoJson = (geometry: unknown): GeoJSON.GeoJsonObject | null => {
+  const value = typeof geometry === "string" ? JSON.parse(geometry) : geometry
+
+  if (!value || typeof value !== "object" || !("type" in value)) {
+    return null
+  }
+
+  const geoJson = value as GeoJSON.GeoJsonObject
+
+  if (geoJson.type === "Feature" || geoJson.type === "FeatureCollection") {
+    return geoJson
+  }
+
+  const feature: GeoJSON.Feature = {
+    type: "Feature",
+    properties: {},
+    geometry: geoJson as GeoJSON.Geometry
+  }
+
+  return feature
 }
 
 function ClickToAddPoint({
@@ -47,13 +69,13 @@ export function RoutePlanner({
   onLengthMetersChange
 }: Props) {
   const [points, setPoints] = useState<LatLngLiteral[]>([])
-  const [routeFeature, setRouteFeature] = useState<GeoJSON.Feature | null>(xnull)
+  const [routeGeoJson, setRouteGeoJson] = useState<GeoJSON.GeoJsonObject | null>(null)
 
   // Když planner vypneš, mapu “ukliď”
   useEffect(() => {
     if (!enabled) {
       setPoints([])
-      setRouteFeature(null)
+      setRouteGeoJson(null)
       onLengthMetersChange?.(0)
     }
   }, [enabled, onLengthMetersChange])
@@ -64,7 +86,7 @@ export function RoutePlanner({
     if (!apiKey) return
 
     if (points.length < 2) {
-      setRouteFeature(null)
+      setRouteGeoJson(null)
       onLengthMetersChange?.(0)
       return
     }
@@ -95,16 +117,14 @@ export function RoutePlanner({
 
       onLengthMetersChange?.(data.length ?? 0)
 
-        const feature: GeoJSON.Feature = {
-          type: "Feature",
-          properties: {},
-          geometry: data.geometry
-        }
-        setRouteFeature(feature)
-      } catch (error: any) {
-        if (error?.name === "AbortError") return
+        const geoJson = toRouteGeoJson(data.geometry)
+        if (!geoJson) throw new Error("Routing response does not contain valid GeoJSON geometry")
+
+        setRouteGeoJson(geoJson)
+      } catch (error: unknown) {
+        if (error instanceof DOMException && error.name === "AbortError") return
         console.error("Routing error:", error)
-        setRouteFeature(null)
+        setRouteGeoJson(null)
         onLengthMetersChange?.(0)
       }
     })()
@@ -118,10 +138,10 @@ export function RoutePlanner({
 
       {enabled && points.map((p, idx) => <Marker key={`${p.lat},${p.lng},${idx}`} position={p} />)}
 
-      {enabled && routeFeature && (
-        <GeoJSON
+      {enabled && routeGeoJson && (
+        <LeafletGeoJSON
           key={`route-${points.length}`}
-          data={routeFeature}
+          data={routeGeoJson}
           style={() => ({
             weight: 5,
             opacity: 0.9,
