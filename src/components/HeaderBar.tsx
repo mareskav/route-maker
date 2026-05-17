@@ -1,3 +1,5 @@
+import type { Dispatch } from "react"
+
 import { Button } from "@/components/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
@@ -5,13 +7,16 @@ export type RouteClickMode = "none" | "road" | "free"
 
 type Props = {
   routeClickMode: RouteClickMode
-  setRouteClickMode: (mode: RouteClickMode) => void
+  setRouteClickMode: Dispatch<RouteClickMode>
   routeLength: number
   onClearRoute?: () => void
 }
 
-const toggleItemClass = (bgColor: string = "amber-300") => {
-  return `rounded-lg px-3 text-white hover:bg-white/10 hover:text-white data-[state=on]:bg-${bgColor} data-[state=on]:text-blue-950 data-[state=on]:shadow-sm`
+const toggleItemClass = (activeColor: "amber" | "white" = "amber") => {
+  const activeColorClass =
+    activeColor === "white" ? "data-[state=on]:bg-white" : "data-[state=on]:bg-amber-300"
+
+  return `rounded-lg px-3 text-white hover:bg-white/10 hover:text-white ${activeColorClass} data-[state=on]:text-blue-950 data-[state=on]:shadow-sm`
 }
 
 export const HeaderBar = (props: Props) => {

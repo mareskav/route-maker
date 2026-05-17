@@ -8,6 +8,7 @@ export const MapPanes = () => {
     if (!map.getPane("touristPane")) {
       const pane = map.createPane("touristPane")
       pane.style.zIndex = "450"
+      pane.style.pointerEvents = "none"
     }
   }, [map])
 

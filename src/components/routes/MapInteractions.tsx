@@ -13,7 +13,7 @@ export const MapInteractions = ({ routeClickMode, onAddRoutePoint }: Props) => {
 
   useEffect(() => {
     const el = map.getContainer()
-    el.style.cursor = routeClickMode === "free" ? "crosshair" : ""
+    el.style.cursor = ["road", "free"].includes(routeClickMode) ? "crosshair" : ""
 
     return () => {
       el.style.cursor = ""
@@ -22,7 +22,7 @@ export const MapInteractions = ({ routeClickMode, onAddRoutePoint }: Props) => {
 
   useMapEvents({
     click(e: LeafletMouseEvent) {
-      if (routeClickMode === "none") return
+      if (routeClickMode !== "free") return
 
       onAddRoutePoint(e.latlng.lat, e.latlng.lng)
     }
