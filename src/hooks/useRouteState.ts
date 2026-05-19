@@ -5,8 +5,10 @@ import { fetchRoute } from "@/lib/routing/api"
 import { downloadRouteGpx, routePointsFromGpx } from "@/lib/routing/routeFile"
 import {
   buildFreeSegments,
+  buildProfileLines,
   buildRoadConnectors,
   buildRoadSections,
+  buildRouteSegmentSummaries,
   calculateFreeRouteLength,
   pointsAreClose,
   routeKey,
@@ -15,11 +17,19 @@ import {
   type RoutePoint,
   type RouteSegmentMode
 } from "@/lib/routing/routeGeometry"
+import type { RouteType } from "@/lib/routing/routeTypes"
 
 type MarkerContextMenu = {
   index: number
   x: number
   y: number
+}
+
+const freeRouteMetersPerSecond = (routeType: RouteType) => {
+  if (routeType.startsWith("car_")) return 60_000 / 3_600
+  if (routeType.startsWith("bike_")) return 18_000 / 3_600
+
+  return 4_000 / 3_600
 }
 
 type Options = {
@@ -32,6 +42,7 @@ type Options = {
   routeClickMode: RouteClickMode
   saveRouteSignal: number
   showRouteMarkers: boolean
+  routeType: RouteType
 }
 
 export const useRouteState = ({
@@ -43,7 +54,8 @@ export const useRouteState = ({
   removeLastRoutePointSignal,
   routeClickMode,
   saveRouteSignal,
-  showRouteMarkers
+  showRouteMarkers,
+  routeType
 }: Options) => {
   const freeSegmentsRef = useRef<ReturnType<typeof buildFreeSegments>>([])
   const roadRoutesRef = useRef<RoadRoute[]>([])
@@ -62,7 +74,27 @@ export const useRouteState = ({
       }, 0),
     [freeSegments]
   )
+  const freeDurationSeconds = Math.round(freeLengthMeters / freeRouteMetersPerSecond(routeType))
+  const roadDurationSeconds = roadRoutes.reduce(
+    (duration, route) => duration + route.durationSeconds,
+    0
+  )
   const roadLengthMeters = roadRoutes.reduce((length, route) => length + route.lengthMeters, 0)
+  const routeLengthMeters = freeLengthMeters + roadLengthMeters
+  const routeDurationSeconds = freeDurationSeconds + roadDurationSeconds
+  const routeSegmentSummaries = useMemo(
+    () =>
+      buildRouteSegmentSummaries(
+        routePoints,
+        roadRoutes,
+        freeRouteMetersPerSecond(routeType)
+      ),
+    [roadRoutes, routePoints, routeType]
+  )
+  const profileLines = useMemo(() => buildProfileLines(routePoints, roadRoutes), [
+    roadRoutes,
+    routePoints
+  ])
   const roadRouteLines = useMemo(
     () =>
       roadRoutes.map((route) => ({
@@ -73,8 +105,8 @@ export const useRouteState = ({
   )
 
   useEffect(() => {
-    onRouteLengthMetersChange(freeLengthMeters + roadLengthMeters)
-  }, [freeLengthMeters, onRouteLengthMetersChange, roadLengthMeters])
+    onRouteLengthMetersChange(routeLengthMeters)
+  }, [onRouteLengthMetersChange, routeLengthMeters])
 
   useEffect(() => {
     onRoutePointCountChange(routePoints.length)
@@ -141,24 +173,58 @@ export const useRouteState = ({
           roadSections.map(async (section) => {
             const route = await fetchRoute({
               apiKey,
-              routeType: "foot_hiking",
+              routeType,
               points: section.points,
               signal: controller.signal
             })
             const connectorSegments = buildRoadConnectors(section.points, route.mappedPoints)
+            const connectorLengthMeters = connectorSegments.reduce((length, segment) => {
+              return length + calculateFreeRouteLength(segment)
+            }, 0)
+            const segmentLengthsMeters = route.routeParts.map((part) => part.length)
+            const segmentDurationsSeconds = route.routeParts.map((part) => part.duration)
+
+            if (segmentLengthsMeters.length > 0) {
+              const firstConnector = connectorSegments.find((segment) =>
+                pointsAreClose(segment[0], section.points[0])
+              )
+              const lastConnector = connectorSegments.find((segment) =>
+                pointsAreClose(segment[0], section.points[section.points.length - 1])
+              )
+
+              if (firstConnector) {
+                const length = calculateFreeRouteLength(firstConnector)
+                segmentLengthsMeters[0] += length
+                segmentDurationsSeconds[0] += Math.round(
+                  length / freeRouteMetersPerSecond(routeType)
+                )
+              }
+
+              if (lastConnector) {
+                const length = calculateFreeRouteLength(lastConnector)
+                const lastIndex = segmentLengthsMeters.length - 1
+                segmentLengthsMeters[lastIndex] += length
+                segmentDurationsSeconds[lastIndex] += Math.round(
+                  length / freeRouteMetersPerSecond(routeType)
+                )
+              }
+            }
 
             return {
               key: routeKey(section.points),
+              durationSeconds: section.renderRoute
+                ? route.durationSeconds +
+                  Math.round(connectorLengthMeters / freeRouteMetersPerSecond(routeType))
+                : 0,
               geoJson: route.geoJson,
               lengthMeters: section.renderRoute
-                ? route.lengthMeters +
-                  connectorSegments.reduce((length, segment) => {
-                    return length + calculateFreeRouteLength(segment)
-                  }, 0)
+                ? route.lengthMeters + connectorLengthMeters
                 : 0,
               connectorSegments,
               mappedPoints: route.mappedPoints,
               pointIndexes: section.pointIndexes,
+              segmentDurationsSeconds: section.renderRoute ? segmentDurationsSeconds : [],
+              segmentLengthsMeters: section.renderRoute ? segmentLengthsMeters : [],
               snapPointIndexes: section.snapPointIndexes,
               renderRoute: section.renderRoute
             }
@@ -191,9 +257,13 @@ export const useRouteState = ({
             .filter((route) => route.renderRoute)
             .map((route) => ({
               key: route.key,
+              durationSeconds: route.durationSeconds,
               geoJson: route.geoJson,
               lengthMeters: route.lengthMeters,
-              connectorSegments: route.connectorSegments
+              connectorSegments: route.connectorSegments,
+              pointIndexes: route.pointIndexes,
+              segmentDurationsSeconds: route.segmentDurationsSeconds,
+              segmentLengthsMeters: route.segmentLengthsMeters
             }))
         )
       } catch (error: unknown) {
@@ -203,7 +273,7 @@ export const useRouteState = ({
     })()
 
     return () => controller.abort()
-  }, [apiKey, roadSections])
+  }, [apiKey, roadSections, routeType])
 
   const addRoutePoint = (lat: number, lng: number) => {
     setMarkerContextMenu(null)
@@ -252,10 +322,14 @@ export const useRouteState = ({
     freeSegments,
     markerContextMenu,
     moveRoutePoint,
+    profileLines,
     removeRoutePoint,
     roadRouteLines,
     roadRoutes,
+    routeDurationSeconds,
+    routeLengthMeters,
     routePoints,
+    routeSegmentSummaries,
     setMarkerContextMenu
   }
 }

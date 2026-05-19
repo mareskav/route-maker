@@ -8,10 +8,14 @@ export type RoutePoint = LatLngLiteral & {
 }
 
 export type RoadRoute = {
+  durationSeconds: number
   key: string
   geoJson: GeoJSON.GeoJsonObject
   lengthMeters: number
   connectorSegments: [LatLngLiteral, LatLngLiteral][]
+  pointIndexes: number[]
+  segmentDurationsSeconds: number[]
+  segmentLengthsMeters: number[]
 }
 
 export type RoadSection = {
@@ -147,4 +151,101 @@ export const toGeoJsonLines = (geoJson: GeoJSON.GeoJsonObject): LatLngLiteral[][
   }
 
   return []
+}
+
+export type RouteSegmentSummary = {
+  durationSeconds: number
+  from: number
+  lengthMeters: number
+  mode: RouteSegmentMode
+  to: number
+}
+
+export const buildProfileLines = (points: RoutePoint[], roadRoutes: RoadRoute[]) => {
+  const lines: LatLngLiteral[][] = []
+  const roadRoutesByStartIndex = new Map<number, RoadRoute>()
+
+  roadRoutes.forEach((route) => {
+    const startIndex = route.pointIndexes[0]
+    if (startIndex !== undefined) roadRoutesByStartIndex.set(startIndex, route)
+  })
+
+  for (let index = 1; index < points.length; index++) {
+    const previousPoint = points[index - 1]
+    const point = points[index]
+
+    if (
+      point.segmentMode === "free" ||
+      (point.segmentMode === "road" && previousPoint.segmentMode === "free")
+    ) {
+      lines.push([previousPoint, point])
+      continue
+    }
+
+    if (point.segmentMode !== "road") continue
+
+    const route = roadRoutesByStartIndex.get(index - 1)
+    if (!route) continue
+
+    const [startConnector, endConnector] = route.connectorSegments
+    if (startConnector) lines.push(startConnector)
+    lines.push(...toGeoJsonLines(route.geoJson))
+    if (endConnector) lines.push(endConnector)
+  }
+
+  return lines
+}
+
+export const buildRouteSegmentSummaries = (
+  points: RoutePoint[],
+  roadRoutes: RoadRoute[],
+  routeTypeMetersPerSecond: number
+) => {
+  const summaries: RouteSegmentSummary[] = []
+
+  for (let index = 1; index < points.length; index++) {
+    const previousPoint = points[index - 1]
+    const point = points[index]
+    const isFreeSegment =
+      point.segmentMode === "free" ||
+      (point.segmentMode === "road" && previousPoint.segmentMode === "free")
+
+    if (isFreeSegment || point.segmentMode !== "road") {
+      const lengthMeters = calculateFreeRouteLength([previousPoint, point])
+      summaries.push({
+        durationSeconds: Math.round(lengthMeters / routeTypeMetersPerSecond),
+        from: index,
+        lengthMeters,
+        mode: "free",
+        to: index + 1
+      })
+      continue
+    }
+
+    const roadRoute = roadRoutes.find((route) => {
+      const localIndex = route.pointIndexes.indexOf(index - 1)
+
+      return localIndex >= 0 && route.pointIndexes[localIndex + 1] === index
+    })
+    const localIndex = roadRoute?.pointIndexes.indexOf(index - 1) ?? -1
+    const lengthMeters =
+      roadRoute && localIndex >= 0
+        ? (roadRoute.segmentLengthsMeters[localIndex] ?? calculateFreeRouteLength([previousPoint, point]))
+        : calculateFreeRouteLength([previousPoint, point])
+    const durationSeconds =
+      roadRoute && localIndex >= 0
+        ? (roadRoute.segmentDurationsSeconds[localIndex] ??
+          Math.round(lengthMeters / routeTypeMetersPerSecond))
+        : Math.round(lengthMeters / routeTypeMetersPerSecond)
+
+    summaries.push({
+      durationSeconds,
+      from: index,
+      lengthMeters,
+      mode: "road",
+      to: index + 1
+    })
+  }
+
+  return summaries
 }

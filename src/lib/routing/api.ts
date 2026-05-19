@@ -108,12 +108,14 @@ async function fetchRouteChunk({
   }
 
   return {
+    durationSeconds: data.duration ?? 0,
     geoJson: {
       type: "FeatureCollection",
       features
     },
     lengthMeters: data.length ?? 0,
-    mappedPoints: toMappedSegmentPoints(data.routePoints, points)
+    mappedPoints: toMappedSegmentPoints(data.routePoints, points),
+    routeParts: data.parts ?? []
   }
 }
 
@@ -136,6 +138,8 @@ export async function fetchRoute({
 
   const features: GeoJSON.Feature[] = []
   const mappedPoints: LatLngLiteral[] = []
+  const routeParts: RoutingResult["routeParts"] = []
+  let durationSeconds = 0
   let lengthMeters = 0
 
   for (let startIndex = 0; startIndex < points.length - 1; startIndex += maxPointsPerRequest - 1) {
@@ -143,16 +147,20 @@ export async function fetchRoute({
     const route = await fetchRouteChunk({ apiKey, routeType, points: chunk, signal })
 
     features.push(...route.geoJson.features)
+    durationSeconds += route.durationSeconds
     lengthMeters += route.lengthMeters
     mappedPoints.push(...(startIndex === 0 ? route.mappedPoints : route.mappedPoints.slice(1)))
+    routeParts.push(...route.routeParts)
   }
 
   return {
+    durationSeconds,
     geoJson: {
       type: "FeatureCollection",
       features
     },
     lengthMeters,
-    mappedPoints: mappedPoints.length === points.length ? mappedPoints : []
+    mappedPoints: mappedPoints.length === points.length ? mappedPoints : [],
+    routeParts
   }
 }

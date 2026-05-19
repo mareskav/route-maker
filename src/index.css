@@ -146,6 +146,14 @@
   margin-left: 14px !important;
 }
 
+.route-panel-collapsed .leaflet-bottom {
+  bottom: 64px !important;
+}
+
+.route-panel-expanded .leaflet-bottom {
+  bottom: 276px !important;
+}
+
 .leaflet-control-scale-line {
   position: relative;
   height: 12px;

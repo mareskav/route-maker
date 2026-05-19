@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet"
 
 import type { RouteClickMode } from "@/components/layout/HeaderBar.tsx"
+import { RouteSummaryPanel } from "@/components/layout/RouteSummaryPanel.tsx"
 import { GrayMapTiles } from "@/components/maps/GrayMapTiles.tsx"
 import { MapImageExportDialog } from "@/components/maps/MapImageExportDialog.tsx"
 import { MapInstance } from "@/components/maps/MapInstance.tsx"
@@ -17,6 +18,7 @@ import { useRouteState } from "@/hooks/useRouteState.ts"
 import { useTileJson } from "@/hooks/useTileJson.ts"
 import { searchPlace, type PlaceSearchResult } from "@/lib/maps/geocoding"
 import type { BaseMapSet, MapTone } from "@/lib/maps/mapMode"
+import type { RouteType } from "@/lib/routing/routeTypes"
 
 // Štoky is default
 const CENTER: [number, number] = [49.502485, 15.5886289]
@@ -35,6 +37,8 @@ type Props = {
   routeWidth: number
   routeDash: number
   routeOpacity: number
+  routeType: RouteType
+  setRouteType: (routeType: RouteType) => void
   showRouteMarkers: boolean
   baseMapSet: BaseMapSet
   mapTone: MapTone
@@ -48,6 +52,7 @@ export const MapView = (props: Props) => {
   const apiKey = import.meta.env.VITE_MAPY_API_KEY as string
   const mapRef = useRef<L.Map | null>(null)
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
+  const [isRoutePanelCollapsed, setIsRoutePanelCollapsed] = useState(true)
   const [placeSearchResult, setPlaceSearchResult] = useState<PlaceSearchResult | null>(null)
   const [placeSearchStatus, setPlaceSearchStatus] = useState<string | null>(null)
   const { error, tileJson } = useTileJson({ apiKey, baseMapSet: props.baseMapSet })
@@ -56,10 +61,14 @@ export const MapView = (props: Props) => {
     freeSegments,
     markerContextMenu,
     moveRoutePoint,
+    profileLines,
     removeRoutePoint,
     roadRouteLines,
     roadRoutes,
+    routeDurationSeconds,
+    routeLengthMeters,
     routePoints,
+    routeSegmentSummaries,
     setMarkerContextMenu
   } = useRouteState({
     apiKey,
@@ -69,6 +78,7 @@ export const MapView = (props: Props) => {
     onRouteLengthMetersChange,
     removeLastRoutePointSignal: props.removeLastRoutePointSignal,
     routeClickMode,
+    routeType: props.routeType,
     saveRouteSignal: props.saveRouteSignal,
     showRouteMarkers: props.showRouteMarkers
   })
@@ -145,7 +155,11 @@ export const MapView = (props: Props) => {
   const attribution = tileJson.attribution ?? ""
 
   return (
-    <div className="relative h-full w-full">
+    <div
+      className={`relative h-full w-full ${
+        isRoutePanelCollapsed ? "route-panel-collapsed" : "route-panel-expanded"
+      }`}
+    >
       <MapContainer center={CENTER} zoom={ZOOM} className="h-full w-full">
         <MapInstance onReady={handleMapReady} />
         <MapPanes />
@@ -215,6 +229,17 @@ export const MapView = (props: Props) => {
           {placeSearchStatus}
         </div>
       )}
+
+      <RouteSummaryPanel
+        apiKey={apiKey}
+        onCollapsedChange={setIsRoutePanelCollapsed}
+        routeDurationSeconds={routeDurationSeconds}
+        routeLengthMeters={routeLengthMeters}
+        routeSegmentSummaries={routeSegmentSummaries}
+        routeType={props.routeType}
+        routeLines={profileLines}
+        onRouteTypeChange={props.setRouteType}
+      />
 
       {markerContextMenu && (
         <RouteMarkerContextMenu

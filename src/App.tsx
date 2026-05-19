@@ -4,6 +4,7 @@ import { HeaderBar, type RouteClickMode } from "@/components/layout/HeaderBar.ts
 import { MapView } from "@/components/maps/MapView.tsx"
 import type { PlaceSearchResult } from "@/lib/maps/geocoding"
 import type { BaseMapSet, MapTone } from "@/lib/maps/mapMode"
+import type { RouteType } from "@/lib/routing/routeTypes"
 
 const App = () => {
   const [routeClickMode, setRouteClickMode] = useState<RouteClickMode>("none")
@@ -28,6 +29,7 @@ const App = () => {
   const [routeDash, setRouteDash] = useState(0)
   const [routeOpacity, setRouteOpacity] = useState(1)
   const [showRouteMarkers, setShowRouteMarkers] = useState(true)
+  const [routeType, setRouteType] = useState<RouteType>("foot_hiking")
   const [baseMapSet, setBaseMapSet] = useState<BaseMapSet>("outdoor")
   const [mapTone, setMapTone] = useState<MapTone>("color")
   const [showTouristOverlay, setShowTouristOverlay] = useState(true)
@@ -92,6 +94,8 @@ const App = () => {
           routeWidth={routeWidth}
           routeDash={routeDash}
           routeOpacity={routeOpacity}
+          routeType={routeType}
+          setRouteType={setRouteType}
           showRouteMarkers={showRouteMarkers}
           baseMapSet={baseMapSet}
           mapTone={mapTone}
