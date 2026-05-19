@@ -11,7 +11,7 @@ import {
   MenubarSeparator,
   MenubarTrigger
 } from "@/components/ui/menubar"
-import type { BaseMapSet, MapTone } from "@/lib/mapMode"
+import type { BaseMapSet, MapTone } from "@/lib/maps/mapMode"
 
 type Props = {
   baseMapSet: BaseMapSet

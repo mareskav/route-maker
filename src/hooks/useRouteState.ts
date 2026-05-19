@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
-import type { RouteClickMode } from "@/components/HeaderBar"
-import { downloadRouteGpx, routePointsFromGpx } from "@/lib/routeFile"
+import type { RouteClickMode } from "@/components/layout/HeaderBar"
+import { downloadRouteGpx, routePointsFromGpx } from "@/lib/routing/routeFile"
 import { fetchRoute } from "@/lib/routing/api"
 import {
   buildFreeSegments,

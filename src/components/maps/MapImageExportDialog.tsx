@@ -26,8 +26,8 @@ import {
   routeVisibilityInViewExport,
   type ExportMode,
   zoomForScale
-} from "@/lib/mapExport"
-import type { MapTone } from "@/lib/mapMode"
+} from "@/lib/maps/mapExport"
+import type { MapTone } from "@/lib/maps/mapMode"
 import type { RoadRoute, RoutePoint } from "@/lib/routing/routeGeometry"
 
 type Props = {

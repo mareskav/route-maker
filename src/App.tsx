@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react"
 
-import { HeaderBar, type RouteClickMode } from "@/components/HeaderBar.tsx"
-import { MapView } from "@/components/MapView.tsx"
-import type { BaseMapSet, MapTone } from "@/lib/mapMode"
+import { HeaderBar, type RouteClickMode } from "@/components/layout/HeaderBar.tsx"
+import { MapView } from "@/components/maps/MapView.tsx"
+import type { BaseMapSet, MapTone } from "@/lib/maps/mapMode"
 
 const App = () => {
   const [routeClickMode, setRouteClickMode] = useState<RouteClickMode>("none")

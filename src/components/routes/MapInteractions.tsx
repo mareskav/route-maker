@@ -2,7 +2,7 @@ import type { LeafletMouseEvent } from "leaflet"
 import { useEffect, useRef } from "react"
 import { useMap, useMapEvents } from "react-leaflet"
 
-import type { RouteClickMode } from "@/components/HeaderBar.tsx"
+import type { RouteClickMode } from "@/components/layout/HeaderBar.tsx"
 
 type Props = {
   routeClickMode: RouteClickMode

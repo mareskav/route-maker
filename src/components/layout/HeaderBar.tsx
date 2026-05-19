@@ -1,10 +1,10 @@
 import type { Dispatch } from "react"
 
-import { MapMenu } from "@/components/MapMenu"
-import { RouteMenu } from "@/components/RouteMenu"
+import { MapMenu } from "@/components/maps/MapMenu"
+import { RouteMenu } from "@/components/routes/RouteMenu"
 import { Menubar } from "@/components/ui/menubar"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import type { BaseMapSet, MapTone } from "@/lib/mapMode"
+import type { BaseMapSet, MapTone } from "@/lib/maps/mapMode"
 
 export type RouteClickMode = "none" | "road" | "free"
 

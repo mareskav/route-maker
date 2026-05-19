@@ -2,7 +2,7 @@ import L from "leaflet"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { MapContainer, TileLayer } from "react-leaflet"
 
-import type { RouteClickMode } from "@/components/HeaderBar.tsx"
+import type { RouteClickMode } from "@/components/layout/HeaderBar.tsx"
 import { GrayMapTiles } from "@/components/maps/GrayMapTiles.tsx"
 import { MapImageExportDialog } from "@/components/maps/MapImageExportDialog.tsx"
 import { MapInstance } from "@/components/maps/MapInstance.tsx"
@@ -15,7 +15,7 @@ import { RouteMarkerContextMenu } from "@/components/routes/RouteMarkerContextMe
 import { RoutePointMarker } from "@/components/routes/RoutePointMarker.tsx"
 import { useRouteState } from "@/hooks/useRouteState.ts"
 import { useTileJson } from "@/hooks/useTileJson.ts"
-import type { BaseMapSet, MapTone } from "@/lib/mapMode"
+import type { BaseMapSet, MapTone } from "@/lib/maps/mapMode"
 
 // Štoky is default
 const CENTER: [number, number] = [49.502485, 15.5886289]

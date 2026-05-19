@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
-import type { BaseMapSet } from "@/lib/mapMode"
+import type { BaseMapSet } from "@/lib/maps/mapMode"
 
 export type TileJson = {
   tiles: string[]
