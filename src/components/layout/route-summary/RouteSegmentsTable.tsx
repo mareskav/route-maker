@@ -1,5 +1,8 @@
-import { useState } from "react"
-
+import {
+  ROUTE_SEGMENT_COLUMN_OPTIONS,
+  type RouteSegmentColumnId,
+  type RouteSegmentColumnVisibility
+} from "./routeSegmentColumns"
 import { formatDistance, formatDuration, formatElevation } from "./routeSummaryFormat"
 
 export type SegmentRow = {
@@ -14,31 +17,21 @@ export type SegmentRow = {
 }
 
 type Props = {
+  onVisibleColumnsChange: (visibleColumns: RouteSegmentColumnVisibility) => void
   rows: SegmentRow[]
+  visibleColumns: RouteSegmentColumnVisibility
 }
 
-type ColumnId = "distance" | "duration" | "ascent" | "descent"
-
-const COLUMN_OPTIONS: { id: ColumnId; label: string }[] = [
-  { id: "distance", label: "Vzdálenost" },
-  { id: "duration", label: "Čas" },
-  { id: "ascent", label: "Nahoru" },
-  { id: "descent", label: "Dolů" }
-]
-
-export const RouteSegmentsTable = ({ rows }: Props) => {
-  const [visibleColumns, setVisibleColumns] = useState<Record<ColumnId, boolean>>({
-    ascent: true,
-    descent: true,
-    distance: true,
-    duration: true
-  })
-
-  const toggleColumn = (column: ColumnId) => {
-    setVisibleColumns((current) => ({
-      ...current,
-      [column]: !current[column]
-    }))
+export const RouteSegmentsTable = ({
+  onVisibleColumnsChange,
+  rows,
+  visibleColumns
+}: Props) => {
+  const toggleColumn = (column: RouteSegmentColumnId) => {
+    onVisibleColumnsChange({
+      ...visibleColumns,
+      [column]: !visibleColumns[column]
+    })
   }
 
   return (
@@ -46,7 +39,7 @@ export const RouteSegmentsTable = ({ rows }: Props) => {
       <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-3 py-1.5">
         <div className="text-sm font-semibold text-slate-700">Úseky mezi body</div>
         <div className="flex flex-wrap justify-end gap-1.5 text-xs text-slate-600">
-          {COLUMN_OPTIONS.map((column) => (
+          {ROUTE_SEGMENT_COLUMN_OPTIONS.map((column) => (
             <label
               key={column.id}
               className="flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5"

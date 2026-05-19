@@ -5,6 +5,11 @@ import { useEffect, useMemo, useState } from "react"
 import { ElevationProfileChart } from "./route-summary/ElevationProfileChart"
 import { RouteMetrics } from "./route-summary/RouteMetrics"
 import { RouteModeControls } from "./route-summary/RouteModeControls"
+import {
+  DEFAULT_ROUTE_SEGMENT_COLUMN_VISIBILITY,
+  ROUTE_SEGMENT_COLUMN_OPTIONS
+} from "./route-summary/routeSegmentColumns"
+import type { RouteSegmentColumnVisibility } from "./route-summary/routeSegmentColumns"
 import { RouteSegmentsTable } from "./route-summary/RouteSegmentsTable"
 import { areaPath, chartPath } from "./route-summary/routeSummaryChart"
 import {
@@ -90,6 +95,8 @@ export const RouteSummaryPanel = ({
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle")
   const [isCollapsed, setIsCollapsed] = useState(true)
   const [isRouteTypeMenuOpen, setIsRouteTypeMenuOpen] = useState(false)
+  const [visibleSegmentColumns, setVisibleSegmentColumns] =
+    useState<RouteSegmentColumnVisibility>(DEFAULT_ROUTE_SEGMENT_COLUMN_VISIBILITY)
   const routeKey = useMemo(
     () =>
       routeLines
@@ -218,18 +225,33 @@ export const RouteSummaryPanel = ({
   }
 
   const exportSegmentsDoc = () => {
+    const activeColumns = ROUTE_SEGMENT_COLUMN_OPTIONS.filter(
+      (column) => visibleSegmentColumns[column.id]
+    )
     const rows = segmentRows
       .map(
         (segment) => `
           <tr>
             <td>${segment.from} - ${segment.to}</td>
-            <td>${escapeHtml(formatDistance(segment.lengthMeters))}</td>
-            <td>${escapeHtml(formatDuration(segment.durationSeconds))}</td>
-            <td>${escapeHtml(formatElevation(segment.elevation.ascentMeters))}</td>
-            <td>${escapeHtml(formatElevation(segment.elevation.descentMeters))}</td>
+            ${activeColumns
+              .map((column) => {
+                if (column.id === "distance") {
+                  return `<td>${escapeHtml(formatDistance(segment.lengthMeters))}</td>`
+                }
+                if (column.id === "duration") {
+                  return `<td>${escapeHtml(formatDuration(segment.durationSeconds))}</td>`
+                }
+                if (column.id === "ascent") {
+                  return `<td>${escapeHtml(formatElevation(segment.elevation.ascentMeters))}</td>`
+                }
+
+                return `<td>${escapeHtml(formatElevation(segment.elevation.descentMeters))}</td>`
+              })
+              .join("")}
           </tr>`
       )
       .join("")
+    const headings = activeColumns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("")
     const html = `<!doctype html>
       <html>
         <head>
@@ -248,7 +270,7 @@ export const RouteSummaryPanel = ({
           <p>Délka: ${escapeHtml(lengthLabel)} · Čas: ${escapeHtml(durationLabel)} · Nahoru: ${escapeHtml(ascentLabel)} · Dolů: ${escapeHtml(descentLabel)}</p>
           <table>
             <thead>
-              <tr><th>Body</th><th>Vzdálenost</th><th>Čas</th><th>Nahoru</th><th>Dolů</th></tr>
+              <tr><th>Body</th>${headings}</tr>
             </thead>
             <tbody>${rows}</tbody>
           </table>
@@ -366,7 +388,11 @@ export const RouteSummaryPanel = ({
             width={width}
           />
 
-          <RouteSegmentsTable rows={segmentRows} />
+          <RouteSegmentsTable
+            onVisibleColumnsChange={setVisibleSegmentColumns}
+            rows={segmentRows}
+            visibleColumns={visibleSegmentColumns}
+          />
         </div>
       </div>
     </aside>
