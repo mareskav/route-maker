@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import type { RouteClickMode } from "@/components/layout/HeaderBar"
-import { downloadRouteGpx, routePointsFromGpx } from "@/lib/routing/routeFile"
 import { fetchRoute } from "@/lib/routing/api"
+import { downloadRouteGpx, routePointsFromGpx } from "@/lib/routing/routeFile"
 import {
   buildFreeSegments,
   buildRoadConnectors,

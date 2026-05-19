@@ -1,6 +1,6 @@
 import L from "leaflet"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { MapContainer, TileLayer } from "react-leaflet"
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet"
 
 import type { RouteClickMode } from "@/components/layout/HeaderBar.tsx"
 import { GrayMapTiles } from "@/components/maps/GrayMapTiles.tsx"
@@ -15,6 +15,7 @@ import { RouteMarkerContextMenu } from "@/components/routes/RouteMarkerContextMe
 import { RoutePointMarker } from "@/components/routes/RoutePointMarker.tsx"
 import { useRouteState } from "@/hooks/useRouteState.ts"
 import { useTileJson } from "@/hooks/useTileJson.ts"
+import { searchPlace, type PlaceSearchResult } from "@/lib/maps/geocoding"
 import type { BaseMapSet, MapTone } from "@/lib/maps/mapMode"
 
 // Štoky is default
@@ -28,6 +29,8 @@ type Props = {
   saveRouteSignal: number
   loadRouteRequest: { contents: string; id: number } | null
   saveImageSignal: number
+  placeSearchRequest: { query: string; id: number } | null
+  selectedPlaceRequest: { place: PlaceSearchResult; id: number } | null
   routeColor: string
   routeWidth: number
   routeDash: number
@@ -45,6 +48,8 @@ export const MapView = (props: Props) => {
   const apiKey = import.meta.env.VITE_MAPY_API_KEY as string
   const mapRef = useRef<L.Map | null>(null)
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
+  const [placeSearchResult, setPlaceSearchResult] = useState<PlaceSearchResult | null>(null)
+  const [placeSearchStatus, setPlaceSearchStatus] = useState<string | null>(null)
   const { error, tileJson } = useTileJson({ apiKey, baseMapSet: props.baseMapSet })
   const {
     addRoutePoint,
@@ -75,6 +80,63 @@ export const MapView = (props: Props) => {
   useEffect(() => {
     if (props.saveImageSignal > 0) setIsExportDialogOpen(true)
   }, [props.saveImageSignal])
+
+  const showPlaceOnMap = useCallback((result: PlaceSearchResult) => {
+    const map = mapRef.current
+
+    setPlaceSearchResult(result)
+    setPlaceSearchStatus(null)
+
+    if (result.bounds) {
+      map?.fitBounds(result.bounds, { maxZoom: 17, padding: [28, 28] })
+    } else {
+      map?.setView(result.position, Math.max(map?.getZoom() ?? 16, 16))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (props.selectedPlaceRequest) showPlaceOnMap(props.selectedPlaceRequest.place)
+  }, [props.selectedPlaceRequest, showPlaceOnMap])
+
+  useEffect(() => {
+    if (!props.placeSearchRequest) return
+
+    const query = props.placeSearchRequest.query.trim()
+    if (!query) return
+
+    if (!apiKey) {
+      setPlaceSearchStatus("Chybí Mapy.com API klíč.")
+      return
+    }
+
+    const controller = new AbortController()
+    const map = mapRef.current
+    const center = map?.getCenter()
+
+    setPlaceSearchStatus("Hledám místo…")
+
+    searchPlace({
+      apiKey,
+      preferNear: center ? { lat: center.lat, lng: center.lng } : undefined,
+      query,
+      signal: controller.signal
+    })
+      .then((result) => {
+        if (!result) {
+          setPlaceSearchResult(null)
+          setPlaceSearchStatus("Místo nebylo nalezeno.")
+          return
+        }
+
+        showPlaceOnMap(result)
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return
+        setPlaceSearchStatus("Hledání se nepovedlo.")
+      })
+
+    return () => controller.abort()
+  }, [apiKey, props.placeSearchRequest, showPlaceOnMap])
 
   if (error) return <div style={{ padding: 16 }}>Error {error}</div>
   if (!tileJson) return <div style={{ padding: 16 }}>Načítám mapu…</div>
@@ -128,7 +190,31 @@ export const MapView = (props: Props) => {
               onDragEnd={(lat, lng) => moveRoutePoint(index, lat, lng)}
             />
           ))}
+
+        {placeSearchResult && (
+          <Marker
+            position={placeSearchResult.position}
+            icon={L.divIcon({
+              className: "place-search-marker",
+              html: "",
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
+            })}
+          >
+            <Popup>
+              <strong>{placeSearchResult.name}</strong>
+              {placeSearchResult.label && <div>{placeSearchResult.label}</div>}
+              {placeSearchResult.location && <div>{placeSearchResult.location}</div>}
+            </Popup>
+          </Marker>
+        )}
       </MapContainer>
+
+      {placeSearchStatus && (
+        <div className="pointer-events-none absolute left-1/2 top-4 z-[450] -translate-x-1/2 rounded-md bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-lg">
+          {placeSearchStatus}
+        </div>
+      )}
 
       {markerContextMenu && (
         <RouteMarkerContextMenu

@@ -2,6 +2,7 @@ import { useCallback, useState } from "react"
 
 import { HeaderBar, type RouteClickMode } from "@/components/layout/HeaderBar.tsx"
 import { MapView } from "@/components/maps/MapView.tsx"
+import type { PlaceSearchResult } from "@/lib/maps/geocoding"
 import type { BaseMapSet, MapTone } from "@/lib/maps/mapMode"
 
 const App = () => {
@@ -15,6 +16,13 @@ const App = () => {
     null
   )
   const [saveImageSignal, setSaveImageSignal] = useState(0)
+  const [placeSearchRequest, setPlaceSearchRequest] = useState<{ query: string; id: number } | null>(
+    null
+  )
+  const [selectedPlaceRequest, setSelectedPlaceRequest] = useState<{
+    place: PlaceSearchResult
+    id: number
+  } | null>(null)
   const [routeColor, setRouteColor] = useState("#dc2626")
   const [routeWidth, setRouteWidth] = useState(5)
   const [routeDash, setRouteDash] = useState(0)
@@ -63,6 +71,12 @@ const App = () => {
           setLoadRouteRequest((request) => ({ contents, id: (request?.id ?? 0) + 1 }))
         }
         onSaveImage={() => setSaveImageSignal((signal) => signal + 1)}
+        onSearchPlace={(query) =>
+          setPlaceSearchRequest((request) => ({ query, id: (request?.id ?? 0) + 1 }))
+        }
+        onSelectPlace={(place) =>
+          setSelectedPlaceRequest((request) => ({ place, id: (request?.id ?? 0) + 1 }))
+        }
       />
       <div className="flex-1">
         <MapView
@@ -72,6 +86,8 @@ const App = () => {
           saveRouteSignal={saveRouteSignal}
           loadRouteRequest={loadRouteRequest}
           saveImageSignal={saveImageSignal}
+          placeSearchRequest={placeSearchRequest}
+          selectedPlaceRequest={selectedPlaceRequest}
           routeColor={routeColor}
           routeWidth={routeWidth}
           routeDash={routeDash}

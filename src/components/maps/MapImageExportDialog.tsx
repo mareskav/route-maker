@@ -222,9 +222,9 @@ export const MapImageExportDialog = ({
   const hasCenterOffset = centerOffset.x !== 0 || centerOffset.y !== 0
 
   return (
-    <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-slate-950/55 p-4">
-      <div className="flex max-h-[min(860px,calc(100vh-2rem))] w-full max-w-5xl flex-col overflow-hidden rounded-lg bg-white text-slate-950 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+    <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-slate-950/55 p-2 sm:p-4">
+      <div className="flex h-[calc(100dvh-1rem)] max-h-[860px] w-full max-w-5xl flex-col overflow-hidden rounded-lg bg-white text-slate-950 shadow-2xl sm:h-[calc(100dvh-2rem)]">
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-5 py-4">
           <div className="flex items-center gap-3">
             <ImageDown className="size-5 text-blue-700" />
             <h2 className="text-lg font-semibold">Uložit obrázek</h2>
@@ -240,8 +240,8 @@ export const MapImageExportDialog = ({
           </Button>
         </div>
 
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-0 md:grid-cols-[320px_1fr]">
-          <div className="border-b border-slate-200 p-5 md:border-r md:border-b-0">
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-0 overflow-hidden md:grid-cols-[320px_1fr]">
+          <div className="min-h-0 overflow-y-auto border-b border-slate-200 p-5 md:border-r md:border-b-0">
             <div className="space-y-5">
               <div>
                 <div className="mb-2 text-sm font-medium text-slate-700">Rozsah</div>
@@ -385,9 +385,9 @@ export const MapImageExportDialog = ({
             </div>
           </div>
 
-          <div className="flex min-h-0 flex-col bg-slate-100">
-            <div className="min-h-0 flex-1 p-4">
-              <div className="grid h-full min-h-[340px] place-items-center overflow-hidden rounded-md border border-slate-300 bg-white">
+          <div className="flex min-h-0 flex-col overflow-hidden bg-slate-100">
+            <div className="min-h-0 flex-1 p-3 sm:p-4">
+              <div className="grid h-full min-h-[220px] place-items-center overflow-hidden rounded-md border border-slate-300 bg-white md:min-h-0">
                 {isGeneratingPreview ? (
                   <div className="text-sm text-slate-500">Generuji náhled…</div>
                 ) : previewUrl ? (
@@ -402,7 +402,7 @@ export const MapImageExportDialog = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 border-t border-slate-200 bg-white px-5 py-4">
+            <div className="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-5 py-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Zavřít
               </Button>
