@@ -14,6 +14,7 @@ export const TouristOverlay = ({ enabled = true }: Props) => {
     <TileLayer
       url="/api/touristOverlay/{z}/{x}/{y}"
       pane="touristPane"
+      crossOrigin="anonymous"
       keepBuffer={8}
       updateWhenIdle
       updateWhenZooming={false}

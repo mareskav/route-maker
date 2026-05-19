@@ -16,10 +16,13 @@ type Props = {
   setRouteColor: Dispatch<string>
   routeWidth: number
   setRouteWidth: Dispatch<number>
+  routeDash: number
+  setRouteDash: Dispatch<number>
   routeOpacity: number
   setRouteOpacity: Dispatch<number>
   showRouteMarkers: boolean
   setShowRouteMarkers: Dispatch<boolean>
+  canSaveRoute: boolean
   baseMapSet: BaseMapSet
   setBaseMapSet: Dispatch<BaseMapSet>
   mapTone: MapTone
@@ -29,7 +32,8 @@ type Props = {
   onClearRoute?: () => void
   onRemoveLastRoutePoint?: () => void
   onSaveRoute?: () => void
-  onLoadRoute?: () => void
+  onLoadRoute?: (contents: string) => void
+  onSaveImage?: () => void
 }
 
 const browseToggleItemClass =
@@ -82,10 +86,13 @@ export const HeaderBar = (props: Props) => {
               setRouteColor={props.setRouteColor}
               routeWidth={props.routeWidth}
               setRouteWidth={props.setRouteWidth}
+              routeDash={props.routeDash}
+              setRouteDash={props.setRouteDash}
               routeOpacity={props.routeOpacity}
               setRouteOpacity={props.setRouteOpacity}
               showRouteMarkers={props.showRouteMarkers}
               setShowRouteMarkers={props.setShowRouteMarkers}
+              canSaveRoute={props.canSaveRoute}
               onClearRoute={props.onClearRoute}
               onRemoveLastRoutePoint={props.onRemoveLastRoutePoint}
               onSaveRoute={props.onSaveRoute}
@@ -98,6 +105,7 @@ export const HeaderBar = (props: Props) => {
               setMapTone={props.setMapTone}
               showTouristOverlay={props.showTouristOverlay}
               setShowTouristOverlay={props.setShowTouristOverlay}
+              onSaveImage={props.onSaveImage}
             />
           </Menubar>
         </div>

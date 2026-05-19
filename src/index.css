@@ -210,7 +210,7 @@
 
 .route-color-picker {
   width: 100% !important;
-  height: 130px !important;
+  height: 88px !important;
 }
 
 .route-color-picker .react-colorful__saturation {
@@ -218,11 +218,11 @@
 }
 
 .route-color-picker .react-colorful__hue {
-  height: 18px;
+  height: 14px;
   border-radius: 0 0 6px 6px;
 }
 
 .route-color-picker .react-colorful__pointer {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }

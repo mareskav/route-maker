@@ -1,5 +1,5 @@
 import type { LeafletMouseEvent } from "leaflet"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useMap, useMapEvents } from "react-leaflet"
 
 import type { RouteClickMode } from "@/components/HeaderBar.tsx"
@@ -12,6 +12,7 @@ type Props = {
 
 export const MapInteractions = ({ routeClickMode, onAddRoutePoint, onMapClick }: Props) => {
   const map = useMap()
+  const suppressClickUntilRef = useRef(0)
 
   useEffect(() => {
     const el = map.getContainer()
@@ -26,7 +27,17 @@ export const MapInteractions = ({ routeClickMode, onAddRoutePoint, onMapClick }:
   }, [map, routeClickMode])
 
   useMapEvents({
+    dragstart() {
+      suppressClickUntilRef.current = Date.now() + 500
+    },
+    dragend() {
+      suppressClickUntilRef.current = Date.now() + 500
+    },
     click(e: LeafletMouseEvent) {
+      if (Date.now() < suppressClickUntilRef.current) {
+        return
+      }
+
       onMapClick?.()
 
       if (!["road", "free"].includes(routeClickMode)) return

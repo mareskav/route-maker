@@ -7,12 +7,17 @@ import type { BaseMapSet, MapTone } from "@/lib/mapMode"
 const App = () => {
   const [routeClickMode, setRouteClickMode] = useState<RouteClickMode>("none")
   const [routeLength, setRouteLength] = useState<number>(0)
+  const [routePointCount, setRoutePointCount] = useState(0)
   const [clearRouteSignal, setClearRouteSignal] = useState(0)
   const [removeLastRoutePointSignal, setRemoveLastRoutePointSignal] = useState(0)
   const [saveRouteSignal, setSaveRouteSignal] = useState(0)
-  const [loadRouteSignal, setLoadRouteSignal] = useState(0)
-  const [routeColor, setRouteColor] = useState("#2563eb")
+  const [loadRouteRequest, setLoadRouteRequest] = useState<{ contents: string; id: number } | null>(
+    null
+  )
+  const [saveImageSignal, setSaveImageSignal] = useState(0)
+  const [routeColor, setRouteColor] = useState("#dc2626")
   const [routeWidth, setRouteWidth] = useState(5)
+  const [routeDash, setRouteDash] = useState(0)
   const [routeOpacity, setRouteOpacity] = useState(1)
   const [showRouteMarkers, setShowRouteMarkers] = useState(true)
   const [baseMapSet, setBaseMapSet] = useState<BaseMapSet>("outdoor")
@@ -38,10 +43,13 @@ const App = () => {
         setRouteColor={setRouteColor}
         routeWidth={routeWidth}
         setRouteWidth={setRouteWidth}
+        routeDash={routeDash}
+        setRouteDash={setRouteDash}
         routeOpacity={routeOpacity}
         setRouteOpacity={setRouteOpacity}
         showRouteMarkers={showRouteMarkers}
         setShowRouteMarkers={setShowRouteMarkers}
+        canSaveRoute={routePointCount > 0}
         baseMapSet={baseMapSet}
         setBaseMapSet={setBaseMapSet}
         mapTone={mapTone}
@@ -51,7 +59,10 @@ const App = () => {
         onClearRoute={clearRoute}
         onRemoveLastRoutePoint={() => setRemoveLastRoutePointSignal((signal) => signal + 1)}
         onSaveRoute={() => setSaveRouteSignal((signal) => signal + 1)}
-        onLoadRoute={() => setLoadRouteSignal((signal) => signal + 1)}
+        onLoadRoute={(contents) =>
+          setLoadRouteRequest((request) => ({ contents, id: (request?.id ?? 0) + 1 }))
+        }
+        onSaveImage={() => setSaveImageSignal((signal) => signal + 1)}
       />
       <div className="flex-1">
         <MapView
@@ -59,14 +70,17 @@ const App = () => {
           clearRouteSignal={clearRouteSignal}
           removeLastRoutePointSignal={removeLastRoutePointSignal}
           saveRouteSignal={saveRouteSignal}
-          loadRouteSignal={loadRouteSignal}
+          loadRouteRequest={loadRouteRequest}
+          saveImageSignal={saveImageSignal}
           routeColor={routeColor}
           routeWidth={routeWidth}
+          routeDash={routeDash}
           routeOpacity={routeOpacity}
           showRouteMarkers={showRouteMarkers}
           baseMapSet={baseMapSet}
           mapTone={mapTone}
           showTouristOverlay={showTouristOverlay}
+          onRoutePointCountChange={setRoutePointCount}
           onRouteLengthMetersChange={calculateRouteLength}
         />
       </div>
