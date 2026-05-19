@@ -177,7 +177,7 @@ export const HeaderBar = (props: Props) => {
             )}
           </form>
 
-          <div className="flex w-full items-center gap-2 sm:w-auto sm:gap-5">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap sm:gap-5">
             <ToggleGroup
               type="single"
               value={props.routeClickMode}
