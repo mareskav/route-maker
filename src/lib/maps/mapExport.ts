@@ -41,11 +41,11 @@ type LargeMapOptions = ExportMapOptions & {
 }
 
 export const EXPORT_SCALE_OPTIONS: ExportScaleOption[] = [
+  { label: "100 m", meters: 100 },
   { label: "300 m", meters: 300 },
   { label: "500 m", meters: 500 },
   { label: "1 km", meters: 1000 },
-  { label: "2 km", meters: 2000 },
-  { label: "5 km", meters: 5000 }
+  { label: "2 km", meters: 2000 }
 ]
 
 export const EXPORT_SIZE_OPTIONS: ExportSizeOption[] = [

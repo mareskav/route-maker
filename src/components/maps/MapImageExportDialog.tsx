@@ -51,10 +51,25 @@ const PREVIEW_SIZE = 900
 const CENTER_NUDGE_PIXELS = 160
 
 const EXPORT_SIZE_NAMES: Record<number, string> = {
-  2000: "Rychlý náhled",
-  3000: "Sdílení",
-  5000: "Tisk",
-  7000: "Velký tisk"
+  2000: "Rychle poslat",
+  3000: "Běžné sdílení",
+  5000: "Tisk na papír",
+  7000: "Velký plakát"
+}
+
+const EXPORT_SIZE_HINTS: Record<number, string> = {
+  2000: "menší soubor",
+  3000: "ostrý obrázek do chatu",
+  5000: "vhodné pro A4",
+  7000: "nejvíc detailů"
+}
+
+const EXPORT_DETAIL_NAMES: Record<number, string> = {
+  100: "Nejpodrobnější mapa",
+  300: "Podrobná mapa",
+  500: "Okolí trasy",
+  1000: "Širší okolí",
+  2000: "Přehled oblasti"
 }
 
 const formatMapDistance = (meters: number) => {
@@ -280,7 +295,7 @@ export const MapImageExportDialog = ({
               </div>
 
               <div className={mode === "view" ? "opacity-45" : ""}>
-                <div className="mb-2 text-sm font-medium text-slate-700">Kvalita obrázku</div>
+                <div className="mb-2 text-sm font-medium text-slate-700">K čemu obrázek bude</div>
                 <div className="grid grid-cols-2 gap-2">
                   {EXPORT_SIZE_OPTIONS.map((option) => (
                     <button
@@ -293,7 +308,9 @@ export const MapImageExportDialog = ({
                       <span className="block text-sm font-semibold">
                         {EXPORT_SIZE_NAMES[option.size] ?? option.label}
                       </span>
-                      <span className="block text-xs text-slate-500">{option.label} px</span>
+                      <span className="block text-xs text-slate-500">
+                        {EXPORT_SIZE_HINTS[option.size] ?? option.label}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -314,7 +331,7 @@ export const MapImageExportDialog = ({
                         {formatMapDistance((largeSize / 100) * option.meters)} na šířku
                       </span>
                       <span className="block text-xs text-slate-500">
-                        Detail mapy {option.label} / 100 px
+                        {EXPORT_DETAIL_NAMES[option.meters] ?? "Vybraná podrobnost"}
                       </span>
                     </button>
                   ))}
@@ -324,7 +341,7 @@ export const MapImageExportDialog = ({
               <div className="rounded-md bg-slate-100 p-3 text-sm text-slate-700">
                 {mode === "view"
                   ? "Uloží se přesně aktuální výřez mapy."
-                  : `Výsledný obrázek pokryje přibližně ${formatMapDistance(largeMapWidthMeters)} x ${formatMapDistance(largeMapWidthMeters)} kolem zvoleného středu.`}
+                  : `Uloží se mapa přibližně ${formatMapDistance(largeMapWidthMeters)} x ${formatMapDistance(largeMapWidthMeters)} kolem zvoleného středu. ${EXPORT_DETAIL_NAMES[scaleMeters] ?? ""}`}
               </div>
 
               <div className={mode === "view" ? "opacity-45" : ""}>
