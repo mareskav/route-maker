@@ -50,6 +50,21 @@ type Props = {
 const PREVIEW_SIZE = 900
 const CENTER_NUDGE_PIXELS = 160
 
+const EXPORT_SIZE_NAMES: Record<number, string> = {
+  2000: "Rychlý náhled",
+  3000: "Sdílení",
+  5000: "Tisk",
+  7000: "Velký tisk"
+}
+
+const formatMapDistance = (meters: number) => {
+  if (meters < 1000) return `${meters} m`
+
+  const kilometers = meters / 1000
+
+  return Number.isInteger(kilometers) ? `${kilometers} km` : `${kilometers.toFixed(1)} km`
+}
+
 export const MapImageExportDialog = ({
   freeSegments,
   mapRef,
@@ -220,6 +235,7 @@ export const MapImageExportDialog = ({
   }
 
   const hasCenterOffset = centerOffset.x !== 0 || centerOffset.y !== 0
+  const largeMapWidthMeters = (largeSize / 100) * scaleMeters
 
   return (
     <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-slate-950/55 p-2 sm:p-4">
@@ -264,34 +280,42 @@ export const MapImageExportDialog = ({
               </div>
 
               <div className={mode === "view" ? "opacity-45" : ""}>
-                <div className="mb-2 text-sm font-medium text-slate-700">Velikost obrázku</div>
+                <div className="mb-2 text-sm font-medium text-slate-700">Kvalita obrázku</div>
                 <div className="grid grid-cols-2 gap-2">
                   {EXPORT_SIZE_OPTIONS.map((option) => (
                     <button
                       key={option.size}
                       type="button"
                       disabled={mode === "view"}
-                      className={`rounded-md border px-3 py-2 text-sm font-medium disabled:cursor-not-allowed ${largeSize === option.size && mode === "large" ? "border-blue-600 bg-blue-50 text-blue-800" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"}`}
+                      className={`rounded-md border px-3 py-2 text-left disabled:cursor-not-allowed ${largeSize === option.size && mode === "large" ? "border-blue-600 bg-blue-50 text-blue-800" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"}`}
                       onClick={() => setLargeSize(option.size)}
                     >
-                      {option.label}
+                      <span className="block text-sm font-semibold">
+                        {EXPORT_SIZE_NAMES[option.size] ?? option.label}
+                      </span>
+                      <span className="block text-xs text-slate-500">{option.label} px</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div className={mode === "view" ? "opacity-45" : ""}>
-                <div className="mb-2 text-sm font-medium text-slate-700">Měřítko velké mapy</div>
+                <div className="mb-2 text-sm font-medium text-slate-700">Záběr velké mapy</div>
                 <div className="grid grid-cols-2 gap-2">
                   {EXPORT_SCALE_OPTIONS.map((option) => (
                     <button
                       key={option.meters}
                       type="button"
                       disabled={mode === "view"}
-                      className={`rounded-md border px-3 py-2 text-sm font-medium disabled:cursor-not-allowed ${scaleMeters === option.meters && mode === "large" ? "border-blue-600 bg-blue-50 text-blue-800" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"}`}
+                      className={`rounded-md border px-3 py-2 text-left disabled:cursor-not-allowed ${scaleMeters === option.meters && mode === "large" ? "border-blue-600 bg-blue-50 text-blue-800" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"}`}
                       onClick={() => setScaleMeters(option.meters)}
                     >
-                      {option.label}
+                      <span className="block text-sm font-semibold">
+                        {formatMapDistance((largeSize / 100) * option.meters)} na šířku
+                      </span>
+                      <span className="block text-xs text-slate-500">
+                        Detail mapy {option.label} / 100 px
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -300,7 +324,7 @@ export const MapImageExportDialog = ({
               <div className="rounded-md bg-slate-100 p-3 text-sm text-slate-700">
                 {mode === "view"
                   ? "Uloží se přesně aktuální výřez mapy."
-                  : "Velká mapa použije aktuální střed mapy, vybranou velikost a měřítko."}
+                  : `Výsledný obrázek pokryje přibližně ${formatMapDistance(largeMapWidthMeters)} x ${formatMapDistance(largeMapWidthMeters)} kolem zvoleného středu.`}
               </div>
 
               <div className={mode === "view" ? "opacity-45" : ""}>
