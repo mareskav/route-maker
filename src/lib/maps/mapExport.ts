@@ -52,10 +52,10 @@ export const EXPORT_SCALE_OPTIONS: ExportScaleOption[] = [
 ]
 
 export const EXPORT_SIZE_OPTIONS: ExportSizeOption[] = [
-  { label: "2000 x 2000", size: 2000 },
-  { label: "3000 x 3000", size: 3000 },
-  { label: "5000 x 5000", size: 5000 },
-  { label: "7000 x 7000", size: 7000 }
+  { label: "Malý", size: 2000 },
+  { label: "Střední", size: 3000 },
+  { label: "Velký", size: 5000 },
+  { label: "Velmi velký", size: 7000 }
 ]
 
 export const DEFAULT_LARGE_EXPORT_SIZE = 5000

@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import {
   downloadCanvas,
   EXPORT_SCALE_OPTIONS,
+  EXPORT_SIZE_OPTIONS,
   exportLargeMapCanvas,
   exportMapCanvas,
   routeVisibilityInLargeExport,
@@ -26,7 +27,7 @@ import {
   zoomForScale
 } from "@/lib/maps/mapExport"
 import type { MapTone } from "@/lib/maps/mapMode"
-import { toGeoJsonLines, type RoadRoute, type RoutePoint } from "@/lib/routing/routeGeometry"
+import { type RoadRoute, type RoutePoint } from "@/lib/routing/routeGeometry"
 
 type Props = {
   freeSegments: [LatLngLiteral, LatLngLiteral][]
@@ -47,22 +48,6 @@ type Props = {
 
 const PREVIEW_SIZE = 900
 const CENTER_NUDGE_PIXELS = 160
-const CENTER_AREA_SIZE = 5000
-const MAX_LARGE_EXPORT_SIZE = 9000
-const ROUTE_PADDING_PIXELS = 240
-
-type ExportAreaMode = "route" | "center" | "czechia"
-
-const EXPORT_AREA_OPTIONS: { label: string; mode: ExportAreaMode }[] = [
-  { label: "Celá trasa", mode: "route" },
-  { label: "Okolí středu", mode: "center" },
-  { label: "Celá ČR", mode: "czechia" }
-]
-
-const CZECHIA_BOUNDS = L.latLngBounds([
-  [48.55, 12.09],
-  [51.06, 18.86]
-])
 
 const EXPORT_SCALE_HINTS: Record<number, string> = {
   100: "ulice a lesní cesty",
@@ -100,8 +85,8 @@ export const MapImageExportDialog = ({
   tileUrl
 }: Props) => {
   const [mode, setMode] = useState<ExportMode>("view")
-  const [scaleMeters, setScaleMeters] = useState(EXPORT_SCALE_OPTIONS[1].meters)
-  const [areaMode, setAreaMode] = useState<ExportAreaMode>("route")
+  const [scaleMeters, setScaleMeters] = useState(EXPORT_SCALE_OPTIONS[2].meters)
+  const [centerSize, setCenterSize] = useState(3000)
   const [centerOffset, setCenterOffset] = useState({ x: 0, y: 0 })
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
@@ -132,24 +117,9 @@ export const MapImageExportDialog = ({
     ]
   )
 
-  const routeBounds = useMemo(() => {
-    const points: LatLngLiteral[] = [
-      ...routePoints,
-      ...freeSegments.flatMap((segment) => segment),
-      ...roadRoutes.flatMap((route) => [
-        ...toGeoJsonLines(route.geoJson).flat(),
-        ...route.connectorSegments.flat()
-      ])
-    ]
-
-    if (points.length === 0) return null
-
-    return L.latLngBounds(points.map((point) => [point.lat, point.lng]))
-  }, [freeSegments, roadRoutes, routePoints])
-
   const exportGeometry = useMemo(() => {
     const map = mapRef.current
-    if (!map || mode !== "large") return { center: undefined, size: CENTER_AREA_SIZE }
+    if (!map || mode !== "large") return { center: undefined, size: centerSize }
 
     const zoom = zoomForScale(map, scaleMeters)
     const manualCenter = map.unproject(
@@ -157,38 +127,14 @@ export const MapImageExportDialog = ({
       zoom
     )
 
-    if (areaMode === "center") {
-      return {
-        center: { lat: manualCenter.lat, lng: manualCenter.lng },
-        size: CENTER_AREA_SIZE
-      }
-    }
-
-    const bounds = areaMode === "czechia" ? CZECHIA_BOUNDS : routeBounds
-    if (!bounds?.isValid()) {
-      return {
-        center: { lat: manualCenter.lat, lng: manualCenter.lng },
-        size: CENTER_AREA_SIZE
-      }
-    }
-
-    const northWest = map.project(bounds.getNorthWest(), zoom)
-    const southEast = map.project(bounds.getSouthEast(), zoom)
-    const projectedSize = Math.max(
-      Math.abs(southEast.x - northWest.x),
-      Math.abs(southEast.y - northWest.y)
-    )
-    const center = bounds.getCenter()
-
     return {
-      center: { lat: center.lat, lng: center.lng },
-      size: Math.ceil(projectedSize + ROUTE_PADDING_PIXELS)
+      center: { lat: manualCenter.lat, lng: manualCenter.lng },
+      size: centerSize
     }
-  }, [areaMode, centerOffset.x, centerOffset.y, mapRef, mode, routeBounds, scaleMeters])
+  }, [centerOffset.x, centerOffset.y, centerSize, mapRef, mode, scaleMeters])
 
   const exportCenter = exportGeometry.center
   const largeSize = exportGeometry.size
-  const isExportTooLarge = mode === "large" && largeSize > MAX_LARGE_EXPORT_SIZE
 
   const routeVisibility = useMemo(() => {
     const map = mapRef.current
@@ -216,12 +162,6 @@ export const MapImageExportDialog = ({
 
     const map = mapRef.current
     if (!map) return
-    if (isExportTooLarge) {
-      setPreviewUrl(null)
-      setIsGeneratingPreview(false)
-      return
-    }
-
     let cancelled = false
     setIsGeneratingPreview(true)
 
@@ -258,7 +198,6 @@ export const MapImageExportDialog = ({
     exportCenter,
     exportOptions,
     largeSize,
-    isExportTooLarge,
     mapRef,
     mode,
     open,
@@ -275,11 +214,6 @@ export const MapImageExportDialog = ({
       window.alert("Mapu se nepodařilo uložit, protože ještě není načtená.")
       return
     }
-    if (isExportTooLarge) {
-      window.alert("Výsledný obrázek by byl příliš velký. Zvolte menší rozsah nebo méně podrobné měřítko mapy.")
-      return
-    }
-
     setIsSaving(true)
     try {
       const canvas =
@@ -353,17 +287,18 @@ export const MapImageExportDialog = ({
               </div>
 
               <div className={mode === "view" ? "opacity-45" : ""}>
-                <div className="mb-2 text-sm font-medium text-slate-700">Rozsah výsledku</div>
-                <div className="grid grid-cols-1 gap-2">
-                  {EXPORT_AREA_OPTIONS.map((option) => (
+                <div className="mb-2 text-sm font-medium text-slate-700">Velikost obrázku</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {EXPORT_SIZE_OPTIONS.map((option) => (
                     <button
-                      key={option.mode}
+                      key={option.size}
                       type="button"
                       disabled={mode === "view"}
-                      className={`rounded-md border px-3 py-2 text-left disabled:cursor-not-allowed ${areaMode === option.mode && mode === "large" ? "border-blue-600 bg-blue-50 text-blue-800" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"}`}
-                      onClick={() => setAreaMode(option.mode)}
+                      className={`rounded-md border px-3 py-2 text-left disabled:cursor-not-allowed ${centerSize === option.size && mode === "large" ? "border-blue-600 bg-blue-50 text-blue-800" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"}`}
+                      onClick={() => setCenterSize(option.size)}
                     >
                       <span className="block text-sm font-semibold">{option.label}</span>
+                      <span className="block text-xs text-slate-500">{option.size} × {option.size} px</span>
                     </button>
                   ))}
                 </div>
@@ -406,7 +341,7 @@ export const MapImageExportDialog = ({
                       type="button"
                       variant="outline"
                       size="icon-sm"
-                      disabled={mode === "view" || areaMode !== "center"}
+                      disabled={mode === "view"}
                       onClick={() => nudgeCenter(0, -CENTER_NUDGE_PIXELS)}
                       aria-label="Posunout střed nahoru"
                     >
@@ -417,7 +352,7 @@ export const MapImageExportDialog = ({
                       type="button"
                       variant="outline"
                       size="icon-sm"
-                      disabled={mode === "view" || areaMode !== "center"}
+                      disabled={mode === "view"}
                       onClick={() => nudgeCenter(-CENTER_NUDGE_PIXELS, 0)}
                       aria-label="Posunout střed doleva"
                     >
@@ -427,7 +362,7 @@ export const MapImageExportDialog = ({
                       type="button"
                       variant="outline"
                       size="icon-sm"
-                      disabled={mode === "view" || areaMode !== "center" || !hasCenterOffset}
+                      disabled={mode === "view" || !hasCenterOffset}
                       onClick={() => setCenterOffset({ x: 0, y: 0 })}
                       aria-label="Vrátit aktuální střed mapy"
                     >
@@ -437,7 +372,7 @@ export const MapImageExportDialog = ({
                       type="button"
                       variant="outline"
                       size="icon-sm"
-                      disabled={mode === "view" || areaMode !== "center"}
+                      disabled={mode === "view"}
                       onClick={() => nudgeCenter(CENTER_NUDGE_PIXELS, 0)}
                       aria-label="Posunout střed doprava"
                     >
@@ -448,7 +383,7 @@ export const MapImageExportDialog = ({
                       type="button"
                       variant="outline"
                       size="icon-sm"
-                      disabled={mode === "view" || areaMode !== "center"}
+                      disabled={mode === "view"}
                       onClick={() => nudgeCenter(0, CENTER_NUDGE_PIXELS)}
                       aria-label="Posunout střed dolů"
                     >
@@ -457,24 +392,12 @@ export const MapImageExportDialog = ({
                     <div />
                   </div>
                   <div className="text-xs leading-5 text-slate-600">
-                    {areaMode !== "center"
-                      ? "Střed se určí podle zvoleného rozsahu."
-                      : hasCenterOffset
+                    {hasCenterOffset
                       ? "Náhled i export používají posunutý střed."
                       : "Výchozí je aktuální střed mapy."}
                   </div>
                 </div>
               </div>
-
-              {isExportTooLarge && (
-                <div className="flex gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-                  <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                  <div>
-                    Tato kombinace rozsahu a měřítka by vytvořila příliš velký obrázek. Zvolte
-                    menší rozsah nebo hrubší měřítko mapy.
-                  </div>
-                </div>
-              )}
 
               {routeVisibility !== "full" && (
                 <div className="flex gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
@@ -494,11 +417,7 @@ export const MapImageExportDialog = ({
           <div className="flex min-h-0 flex-col overflow-hidden bg-slate-100">
             <div className="min-h-0 flex-1 p-3 sm:p-4">
               <div className="grid h-full min-h-[220px] place-items-center overflow-hidden rounded-md border border-slate-300 bg-white md:min-h-0">
-                {isExportTooLarge ? (
-                  <div className="px-4 text-center text-sm text-slate-500">
-                    Náhled se nevytváří, protože by výsledný obrázek byl příliš velký.
-                  </div>
-                ) : isGeneratingPreview ? (
+                {isGeneratingPreview ? (
                   <div className="text-sm text-slate-500">Generuji náhled…</div>
                 ) : previewUrl ? (
                   <img
@@ -516,7 +435,7 @@ export const MapImageExportDialog = ({
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Zavřít
               </Button>
-              <Button type="button" onClick={handleSave} disabled={isSaving || isExportTooLarge}>
+              <Button type="button" onClick={handleSave} disabled={isSaving}>
                 <Download className="size-4" />
                 {isSaving ? "Ukládám…" : "Uložit obrázek"}
               </Button>

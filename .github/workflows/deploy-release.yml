@@ -1,8 +1,11 @@
 name: Deploy release to Cloudflare
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
+      - dev
+      - "feature/**"
 
 jobs:
   deploy:
