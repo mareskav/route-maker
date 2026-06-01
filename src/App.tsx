@@ -115,6 +115,19 @@ const App = () => {
           setSelectedPlaceRequest((request) => ({ place, id: (request?.id ?? 0) + 1 }))
         }
       />
+      {language === "ru" && (
+        <div className="flex items-center justify-center gap-4 bg-[#005BBB] px-4 py-2 text-center text-sm font-semibold text-white shadow-sm">
+          <span className="flex items-center gap-1.5">
+            <img src="https://flagcdn.com/w40/ru.png" srcSet="https://flagcdn.com/w80/ru.png 2x" className="h-4 w-6 rounded-[2px] object-cover shadow-[0_0_0_1px_rgba(15,23,42,0.18)]" alt="" loading="eager" />
+            🛑 Стоп войне!
+          </span>
+          <span className="h-4 w-px bg-[#FFD500]" aria-hidden="true" />
+          <span className="flex items-center gap-1.5 text-[#FFD500]">
+            <img src="https://flagcdn.com/w40/ua.png" srcSet="https://flagcdn.com/w80/ua.png 2x" className="h-4 w-6 rounded-[2px] object-cover shadow-[0_0_0_1px_rgba(15,23,42,0.18)]" alt="" loading="eager" />
+            ❤️ Стоп війні!
+          </span>
+        </div>
+      )}
       <div className="min-h-0 flex-1">
         <MapView
           language={language}
