@@ -1,4 +1,4 @@
-import { ChevronDown, Globe2 } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import type { Dispatch } from "react"
 
 import { PlaceSearch } from "@/components/layout/PlaceSearch"
@@ -153,7 +153,7 @@ export const HeaderBar = (props: Props) => {
             </Menubar>
           </div>
 
-          <div className="ml-auto flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-6 sm:ml-auto sm:gap-8">
             <PlaceSearch
               apiKey={apiKey}
               language={props.language}
@@ -168,7 +168,6 @@ export const HeaderBar = (props: Props) => {
                   aria-label={t.header.language}
                   title={t.header.language}
                 >
-                  <Globe2 className="hidden size-4 sm:block" />
                   <FlagCluster countries={languageFlagCountries[props.language]} />
                   <span className="hidden max-w-28 truncate sm:inline">
                     {languageLabels[props.language]}
@@ -176,19 +175,23 @@ export const HeaderBar = (props: Props) => {
                   <span className="sm:hidden">{props.language.toUpperCase()}</span>
                   <ChevronDown className="size-3.5 opacity-80" />
                 </MenubarTrigger>
-                <MenubarContent align="end" className="min-w-64">
+                <MenubarContent align="end" className="w-72 max-w-[calc(100vw-1.5rem)]">
                   <MenubarRadioGroup
                     value={props.language}
                     onValueChange={(value) => props.setLanguage(value as Language)}
                   >
                     {languages.map((language) => (
-                      <MenubarRadioItem key={language} value={language} className="gap-3">
+                      <MenubarRadioItem
+                        key={language}
+                        value={language}
+                        className="grid grid-cols-[5.5rem_minmax(0,1fr)_2rem] gap-3"
+                      >
                         <FlagCluster
                           countries={languageFlagCountries[language]}
-                          className="w-16"
+                          className="w-[5.5rem]"
                         />
                         <span className="min-w-0 flex-1 truncate">{languageLabels[language]}</span>
-                        <span className="text-xs font-semibold text-muted-foreground">
+                        <span className="justify-self-end text-xs font-semibold text-muted-foreground">
                           {language.toUpperCase()}
                         </span>
                       </MenubarRadioItem>
