@@ -7,6 +7,11 @@ import {
   type RouteSegmentMode
 } from "@/lib/routing/routeGeometry"
 
+type RouteFileMessages = {
+  emptyFile: string
+  parseFailed: string
+}
+
 type ExportRouteFileOptions = {
   freeSegments: [LatLngLiteral, LatLngLiteral][]
   roadRoutes: RoadRoute[]
@@ -72,11 +77,11 @@ const routeLinesFromOptions = (options: ExportRouteFileOptions) => [
   ])
 ]
 
-export const routePointsFromGpx = (contents: string) => {
+export const routePointsFromGpx = (contents: string, messages?: RouteFileMessages) => {
   const document = new DOMParser().parseFromString(contents, "application/xml")
   const parserError = document.querySelector("parsererror")
 
-  if (parserError) throw new Error("Soubor GPX se nepodařilo přečíst.")
+  if (parserError) throw new Error(messages?.parseFailed ?? "Soubor GPX se nepodařilo přečíst.")
 
   const routePointElements = Array.from(document.getElementsByTagNameNS("*", "rtept"))
   const trackPointElements = Array.from(document.getElementsByTagNameNS("*", "trkpt"))
@@ -97,7 +102,9 @@ export const routePointsFromGpx = (contents: string) => {
     })
     .filter((point): point is RoutePoint => point !== null)
 
-  if (routePoints.length === 0) throw new Error("Soubor neobsahuje žádné body trasy.")
+  if (routePoints.length === 0) {
+    throw new Error(messages?.emptyFile ?? "Soubor neobsahuje žádné body trasy.")
+  }
 
   return routePoints
 }

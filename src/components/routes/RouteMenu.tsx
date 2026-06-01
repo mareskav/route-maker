@@ -11,8 +11,11 @@ import {
   MenubarSeparator,
   MenubarTrigger
 } from "@/components/ui/menubar"
+import type { Language } from "@/lib/i18n"
+import { translations } from "@/lib/i18n"
 
 type Props = {
+  language: Language
   routeColor: string
   setRouteColor: Dispatch<string>
   routeWidth: number
@@ -30,17 +33,17 @@ type Props = {
   onLoadRoute?: (contents: string) => void
 }
 
-const routeColors = [
-  { label: "červená", value: "#dc2626" },
-  { label: "modrá", value: "#2563eb" },
-  { label: "zelená", value: "#16a34a" },
-  { label: "oranžová", value: "#f97316" },
-  { label: "žlutá", value: "#facc15" },
-  { label: "fialová", value: "#7e22ce" }
-]
-
 export const RouteMenu = (props: Props) => {
+  const t = translations[props.language].routeMenu
   const routeFileInputRef = useRef<HTMLInputElement | null>(null)
+  const routeColors = [
+    { label: t.colors.red, value: "#dc2626" },
+    { label: t.colors.blue, value: "#2563eb" },
+    { label: t.colors.green, value: "#16a34a" },
+    { label: t.colors.orange, value: "#f97316" },
+    { label: t.colors.yellow, value: "#facc15" },
+    { label: t.colors.purple, value: "#7e22ce" }
+  ]
 
   const handleRouteFileChange = async () => {
     const file = routeFileInputRef.current?.files?.[0]
@@ -62,23 +65,23 @@ export const RouteMenu = (props: Props) => {
       />
       <MenubarMenu>
         <MenubarTrigger className="gap-1 rounded-sm px-3 py-2 text-base text-white hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white data-[state=open]:bg-blue-700 data-[state=open]:text-white">
-          Trasa <ChevronDown className="size-4" />
+          {t.route} <ChevronDown className="size-4" />
         </MenubarTrigger>
         <MenubarContent className="z-[2000] max-h-[calc(100vh-5rem)] w-[285px] overflow-y-auto p-0 text-sm">
           <div className="space-y-2 px-4 pb-3" onKeyDown={(event) => event.stopPropagation()}>
             <MenubarLabel className="px-0 pt-2.5 pb-0.5 text-[11px] font-semibold uppercase text-slate-500">
-              Vzhled trasy
+              {t.appearance}
             </MenubarLabel>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">
-                <span>Barva trasy:</span>
+                <span>{t.color}</span>
                 <span className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-xs text-slate-700">
                   {props.routeColor.toUpperCase()}
                 </span>
               </div>
 
-              <div className="flex flex-wrap gap-1.5" aria-label="Základní barvy trasy">
+              <div className="flex flex-wrap gap-1.5" aria-label={t.basicColors}>
                 {routeColors.map((color) => (
                   <button
                     key={color.value}
@@ -100,7 +103,7 @@ export const RouteMenu = (props: Props) => {
             </div>
 
             <label className="block space-y-1">
-              <span>Šířka trasy:</span>
+              <span>{t.width}:</span>
               <input
                 type="range"
                 min={2}
@@ -113,7 +116,7 @@ export const RouteMenu = (props: Props) => {
 
             <label className="block space-y-1">
               <span>
-                Šrafování trasy: {props.routeDash === 0 ? "vypnuto" : `${props.routeDash} %`}
+                {t.dash}: {props.routeDash === 0 ? t.hidden : `${props.routeDash} %`}
               </span>
               <input
                 type="range"
@@ -127,7 +130,7 @@ export const RouteMenu = (props: Props) => {
             </label>
 
             <label className="block space-y-1">
-              <span>Viditelnost trasy: {Math.round(props.routeOpacity * 100)} %</span>
+              <span>{t.opacity}: {Math.round(props.routeOpacity * 100)} %</span>
               <input
                 type="range"
                 min={0}
@@ -141,7 +144,7 @@ export const RouteMenu = (props: Props) => {
 
             <MenubarSeparator className="-mx-4 my-0.5" />
             <MenubarLabel className="px-0 pt-1.5 pb-0.5 text-[11px] font-semibold uppercase text-slate-500">
-              Zobrazení
+              {t.display}
             </MenubarLabel>
 
             <label className="flex cursor-pointer items-center gap-2.5">
@@ -151,33 +154,33 @@ export const RouteMenu = (props: Props) => {
                 onChange={(event) => props.setShowRouteMarkers(!event.target.checked)}
                 className="size-4 accent-blue-600"
               />
-              <span>Skrýt značky</span>
+              <span>{t.hideMarkers}</span>
             </label>
           </div>
 
           <MenubarSeparator className="my-0" />
           <MenubarLabel className="px-4 pt-2.5 pb-0.5 text-[11px] font-semibold uppercase text-slate-500">
-            Soubor
+            {t.file}
           </MenubarLabel>
           <MenubarItem
             className="px-4 py-2 text-sm"
             onSelect={() => routeFileInputRef.current?.click()}
           >
-            Načíst trasu
+            {t.loadRoute}
           </MenubarItem>
           <MenubarItem
             className="px-4 py-2 text-sm"
             disabled={!props.canSaveRoute}
             onSelect={props.onSaveRoute}
           >
-            Uložit trasu
+            {t.saveRoute}
           </MenubarItem>
           <MenubarSeparator className="my-0" />
           <MenubarLabel className="px-4 pt-2.5 pb-0.5 text-[11px] font-semibold uppercase text-slate-500">
-            Akce
+            {t.actions}
           </MenubarLabel>
           <MenubarItem className="px-4 py-2 text-sm" onSelect={props.onClearRoute}>
-            Vymazat trasu
+            {t.clearRoute}
           </MenubarItem>
           {/*<MenubarItem className="px-7 py-4 text-base" onSelect={props.onRemoveLastRoutePoint}>*/}
           {/*  Vymazat poslední bod trasy*/}

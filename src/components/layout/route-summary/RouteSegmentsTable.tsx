@@ -5,6 +5,9 @@ import {
 } from "./routeSegmentColumns"
 import { formatDistance, formatDuration, formatElevation } from "./routeSummaryFormat"
 
+import type { Language } from "@/lib/i18n"
+import { translations } from "@/lib/i18n"
+
 export type SegmentRow = {
   durationSeconds: number
   elevation: {
@@ -18,6 +21,7 @@ export type SegmentRow = {
 
 type Props = {
   isElevationLoading?: boolean
+  language: Language
   onVisibleColumnsChange: (visibleColumns: RouteSegmentColumnVisibility) => void
   rows: SegmentRow[]
   visibleColumns: RouteSegmentColumnVisibility
@@ -25,10 +29,19 @@ type Props = {
 
 export const RouteSegmentsTable = ({
   isElevationLoading = false,
+  language,
   onVisibleColumnsChange,
   rows,
   visibleColumns
 }: Props) => {
+  const t = translations[language].routeSummary
+  const columnLabels = {
+    ascent: t.ascent,
+    descent: t.descent,
+    distance: t.distance,
+    duration: t.duration
+  }
+
   const toggleColumn = (column: RouteSegmentColumnId) => {
     onVisibleColumnsChange({
       ...visibleColumns,
@@ -39,7 +52,7 @@ export const RouteSegmentsTable = ({
   return (
     <div className="h-52 min-h-0 overflow-hidden rounded-md border border-slate-200 bg-white">
       <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-3 py-1.5">
-        <div className="text-sm font-semibold text-slate-700">Úseky mezi body</div>
+        <div className="text-sm font-semibold text-slate-700">{t.segments}</div>
         <div className="flex flex-wrap justify-end gap-1.5 text-xs text-slate-600">
           {ROUTE_SEGMENT_COLUMN_OPTIONS.map((column) => (
             <label
@@ -52,7 +65,7 @@ export const RouteSegmentsTable = ({
                 checked={visibleColumns[column.id]}
                 onChange={() => toggleColumn(column.id)}
               />
-              {column.label}
+              {columnLabels[column.id]}
             </label>
           ))}
         </div>
@@ -61,13 +74,13 @@ export const RouteSegmentsTable = ({
         <table className="w-full text-sm">
           <thead className="sticky top-0 bg-slate-50 text-xs font-semibold uppercase text-slate-500">
             <tr>
-              <th className="px-2 py-2 text-left">Body</th>
+              <th className="px-2 py-2 text-left">{t.points}</th>
               {visibleColumns.distance && (
-                <th className="px-2 py-2 text-right">Vzdálenost</th>
+                <th className="px-2 py-2 text-right">{t.distance}</th>
               )}
-              {visibleColumns.duration && <th className="px-2 py-2 text-right">Čas</th>}
-              {visibleColumns.ascent && <th className="px-2 py-2 text-right">Nahoru</th>}
-              {visibleColumns.descent && <th className="px-2 py-2 text-right">Dolů</th>}
+              {visibleColumns.duration && <th className="px-2 py-2 text-right">{t.duration}</th>}
+              {visibleColumns.ascent && <th className="px-2 py-2 text-right">{t.ascent}</th>}
+              {visibleColumns.descent && <th className="px-2 py-2 text-right">{t.descent}</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -77,7 +90,9 @@ export const RouteSegmentsTable = ({
                   {segment.from} - {segment.to}
                 </td>
                 {visibleColumns.distance && (
-                  <td className="px-2 py-2 text-right">{formatDistance(segment.lengthMeters)}</td>
+                  <td className="px-2 py-2 text-right">
+                    {formatDistance(segment.lengthMeters, language)}
+                  </td>
                 )}
                 {visibleColumns.duration && (
                   <td className="px-2 py-2 text-right">

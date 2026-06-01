@@ -1,6 +1,8 @@
 import { Bike, Car, Check, ChevronDown, Footprints } from "lucide-react"
 import type { Dispatch } from "react"
 
+import type { Language } from "@/lib/i18n"
+import { routeTypeLabel as getRouteTypeLabel, translations } from "@/lib/i18n"
 import { ROUTE_TYPE_OPTIONS, type RouteType } from "@/lib/routing/routeTypes"
 
 type ModeGroup = {
@@ -9,14 +11,9 @@ type ModeGroup = {
   routeType: RouteType
 }
 
-const MODE_GROUPS: ModeGroup[] = [
-  { routeType: "foot_hiking", label: "Pěšky", icon: Footprints },
-  { routeType: "bike_mountain", label: "Kolo", icon: Bike },
-  { routeType: "car_fast_traffic", label: "Auto", icon: Car }
-]
-
 type Props = {
   isOpen: boolean
+  language: Language
   onOpenChange: Dispatch<boolean>
   onRouteTypeChange: (routeType: RouteType) => void
   routeType: RouteType
@@ -24,12 +21,18 @@ type Props = {
 
 export const RouteModeControls = ({
   isOpen,
+  language,
   onOpenChange,
   onRouteTypeChange,
   routeType
 }: Props) => {
-  const routeTypeLabel =
-    ROUTE_TYPE_OPTIONS.find((option) => option.routeType === routeType)?.label ?? "Trasa"
+  const t = translations[language].routeModes
+  const modeGroups: ModeGroup[] = [
+    { routeType: "foot_hiking", label: t.foot, icon: Footprints },
+    { routeType: "bike_mountain", label: t.bike, icon: Bike },
+    { routeType: "car_fast_traffic", label: t.car, icon: Car }
+  ]
+  const selectedRouteTypeLabel = getRouteTypeLabel(routeType, language) ?? t.route
   const visibleRouteTypeOptions = ROUTE_TYPE_OPTIONS.filter((option) => {
     if (routeType.startsWith("foot_")) return option.routeType.startsWith("foot_")
     if (routeType.startsWith("bike_")) return option.routeType.startsWith("bike_")
@@ -41,7 +44,7 @@ export const RouteModeControls = ({
   return (
     <div className="flex min-w-0 items-center overflow-visible rounded-lg border border-blue-400/25 bg-blue-950/35 p-0.5 shadow-inner">
       <div className="flex shrink-0 gap-0.5">
-        {MODE_GROUPS.map((group) => {
+        {modeGroups.map((group) => {
           const Icon = group.icon
           const isActive =
             group.routeType.startsWith("foot_") === routeType.startsWith("foot_") ||
@@ -75,7 +78,7 @@ export const RouteModeControls = ({
           aria-expanded={isOpen}
           aria-haspopup="listbox"
         >
-          <span className="truncate">{routeTypeLabel}</span>
+          <span className="truncate">{selectedRouteTypeLabel}</span>
           <ChevronDown className="size-3.5 shrink-0 text-blue-800" />
         </button>
 
@@ -100,7 +103,7 @@ export const RouteModeControls = ({
                 role="option"
                 aria-selected={option.routeType === routeType}
               >
-                <span>{option.label}</span>
+                <span>{getRouteTypeLabel(option.routeType, language)}</span>
                 {option.routeType === routeType && <Check className="size-4 text-blue-700" />}
               </button>
             ))}

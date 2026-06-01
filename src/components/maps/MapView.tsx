@@ -18,6 +18,8 @@ import { RoutePointMarker } from "@/components/routes/RoutePointMarker.tsx"
 import { LoadingSpinner } from "@/components/ui/loading"
 import { useRouteState } from "@/hooks/useRouteState.ts"
 import { useTileJson } from "@/hooks/useTileJson.ts"
+import type { Language } from "@/lib/i18n"
+import { translations } from "@/lib/i18n"
 import { searchPlace, type PlaceSearchResult } from "@/lib/maps/geocoding"
 import type { BaseMapSet, MapTone } from "@/lib/maps/mapMode"
 import type { RouteType } from "@/lib/routing/routeTypes"
@@ -27,6 +29,7 @@ const CENTER: [number, number] = [49.502485, 15.5886289]
 const ZOOM = 14
 
 type Props = {
+  language: Language
   routeClickMode: RouteClickMode
   clearRouteSignal: number
   removeLastRoutePointSignal: number
@@ -45,19 +48,25 @@ type Props = {
   baseMapSet: BaseMapSet
   mapTone: MapTone
   showTouristOverlay: boolean
+  onImageExportOpenChange?: (open: boolean) => void
   onRoutePointCountChange: (count: number) => void
   onRouteLengthMetersChange: (meters: number) => void
 }
 
 export const MapView = (props: Props) => {
-  const { onRouteLengthMetersChange, routeClickMode } = props
+  const { onImageExportOpenChange, onRouteLengthMetersChange, routeClickMode } = props
+  const t = translations[props.language].mapView
   const apiKey = import.meta.env.VITE_MAPY_API_KEY as string
   const mapRef = useRef<L.Map | null>(null)
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
   const [isRoutePanelCollapsed, setIsRoutePanelCollapsed] = useState(true)
   const [placeSearchResult, setPlaceSearchResult] = useState<PlaceSearchResult | null>(null)
   const [placeSearchStatus, setPlaceSearchStatus] = useState<string | null>(null)
-  const { error, tileJson } = useTileJson({ apiKey, baseMapSet: props.baseMapSet })
+  const { error, tileJson } = useTileJson({
+    apiKey,
+    baseMapSet: props.baseMapSet,
+    language: props.language
+  })
   const {
     addRoutePoint,
     freeSegments,
@@ -81,6 +90,7 @@ export const MapView = (props: Props) => {
     onRouteLengthMetersChange,
     removeLastRoutePointSignal: props.removeLastRoutePointSignal,
     routeClickMode,
+    language: props.language,
     routeType: props.routeType,
     saveRouteSignal: props.saveRouteSignal,
     showRouteMarkers: props.showRouteMarkers
@@ -93,6 +103,14 @@ export const MapView = (props: Props) => {
   useEffect(() => {
     if (props.saveImageSignal > 0) setIsExportDialogOpen(true)
   }, [props.saveImageSignal])
+
+  const handleExportDialogOpenChange = useCallback(
+    (open: boolean) => {
+      setIsExportDialogOpen(open)
+      onImageExportOpenChange?.(open)
+    },
+    [onImageExportOpenChange]
+  )
 
   const showPlaceOnMap = useCallback((result: PlaceSearchResult) => {
     const map = mapRef.current
@@ -118,7 +136,7 @@ export const MapView = (props: Props) => {
     if (!query) return
 
     if (!apiKey) {
-      setPlaceSearchStatus("Chybí Mapy.com API klíč.")
+      setPlaceSearchStatus(t.missingApiKey)
       return
     }
 
@@ -126,7 +144,7 @@ export const MapView = (props: Props) => {
     const map = mapRef.current
     const center = map?.getCenter()
 
-    setPlaceSearchStatus("Hledám místo…")
+    setPlaceSearchStatus(t.searchingPlace)
 
     searchPlace({
       apiKey,
@@ -137,7 +155,7 @@ export const MapView = (props: Props) => {
       .then((result) => {
         if (!result) {
           setPlaceSearchResult(null)
-          setPlaceSearchStatus("Místo nebylo nalezeno.")
+          setPlaceSearchStatus(t.placeNotFound)
           return
         }
 
@@ -145,22 +163,22 @@ export const MapView = (props: Props) => {
       })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return
-        setPlaceSearchStatus("Hledání se nepovedlo.")
+        setPlaceSearchStatus(t.searchFailed)
       })
 
     return () => controller.abort()
-  }, [apiKey, props.placeSearchRequest, showPlaceOnMap])
+  }, [apiKey, props.placeSearchRequest, showPlaceOnMap, t])
 
   if (error) {
     return (
       <div className="grid h-full place-items-center bg-slate-100 p-4 text-center text-sm text-slate-700">
         <div className="rounded-md bg-white px-4 py-3 shadow-sm ring-1 ring-black/5">
-          Mapu se nepodařilo načíst: {error}
+          {t.mapLoadFailed} {error}
         </div>
       </div>
     )
   }
-  if (!tileJson) return <MapLoadingState />
+  if (!tileJson) return <MapLoadingState language={props.language} />
 
   const tileUrl = tileJson.tiles[0]
   const attribution = tileJson.attribution ?? ""
@@ -245,12 +263,12 @@ export const MapView = (props: Props) => {
           {routingStatus === "loading" && (
             <div className="flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-lg ring-1 ring-black/5">
               <LoadingSpinner className="text-blue-700" />
-              Přepočítávám trasu
+              {t.routeLoading}
             </div>
           )}
           {routingStatus === "error" && (
             <div className="rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-800 shadow-lg ring-1 ring-red-200">
-              Trasu se nepodařilo přepočítat.
+              {t.routeFailed}
             </div>
           )}
         </div>
@@ -258,6 +276,7 @@ export const MapView = (props: Props) => {
 
       <RouteSummaryPanel
         apiKey={apiKey}
+        language={props.language}
         onCollapsedChange={setIsRoutePanelCollapsed}
         routeDurationSeconds={routeDurationSeconds}
         routeLengthMeters={routeLengthMeters}
@@ -272,15 +291,17 @@ export const MapView = (props: Props) => {
           left={markerContextMenu.x}
           top={markerContextMenu.y}
           onRemove={() => removeRoutePoint(markerContextMenu.index)}
+          language={props.language}
         />
       )}
 
       <MapImageExportDialog
         freeSegments={freeSegments}
+        language={props.language}
         mapRef={mapRef}
         mapTone={props.mapTone}
         open={isExportDialogOpen}
-        onOpenChange={setIsExportDialogOpen}
+        onOpenChange={handleExportDialogOpenChange}
         roadRoutes={roadRoutes}
         routeColor={props.routeColor}
         routeDash={props.routeDash}

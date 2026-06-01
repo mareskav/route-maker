@@ -16,6 +16,8 @@ import { useEffect, useMemo, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { LoadingSpinner, SkeletonBlock } from "@/components/ui/loading"
+import type { Language } from "@/lib/i18n"
+import { interpolate, translations } from "@/lib/i18n"
 import {
   downloadCanvas,
   EXPORT_SCALE_OPTIONS,
@@ -32,6 +34,7 @@ import { type RoadRoute, type RoutePoint } from "@/lib/routing/routeGeometry"
 
 type Props = {
   freeSegments: [LatLngLiteral, LatLngLiteral][]
+  language: Language
   mapRef: RefObject<L.Map | null>
   mapTone: MapTone
   onOpenChange: (open: boolean) => void
@@ -50,17 +53,6 @@ type Props = {
 const PREVIEW_SIZE = 900
 const CENTER_NUDGE_PIXELS = 160
 
-const EXPORT_SCALE_HINTS: Record<number, string> = {
-  100: "ulice a lesní cesty",
-  200: "detailní turistická mapa",
-  300: "trasa s blízkým okolím",
-  500: "města a krajina",
-  1000: "širší oblast",
-  2000: "region",
-  5000: "velký přehled",
-  10000: "stát a okolí"
-}
-
 const formatMapDistance = (meters: number) => {
   if (meters < 1000) return `${meters} m`
 
@@ -69,53 +61,58 @@ const formatMapDistance = (meters: number) => {
   return Number.isInteger(kilometers) ? `${kilometers} km` : `${kilometers.toFixed(1)} km`
 }
 
-const MapPreviewSkeleton = () => (
-  <div className="relative h-full w-full overflow-hidden bg-emerald-50">
-    <SkeletonBlock className="absolute -left-10 top-5 h-36 w-52 rounded-[48%] bg-emerald-200/70" />
-    <SkeletonBlock className="absolute right-8 top-8 h-28 w-44 rounded-[45%] bg-lime-200/70" />
-    <SkeletonBlock className="absolute bottom-6 left-10 h-32 w-56 rounded-[50%] bg-green-200/70" />
-    <SkeletonBlock className="absolute bottom-12 right-4 h-36 w-52 rounded-[48%] bg-emerald-200/60" />
-    <div className="absolute -right-8 top-1/3 h-16 w-56 rotate-[-18deg] rounded-full bg-sky-100/80 shadow-inner" />
-    <svg className="absolute inset-0 h-full w-full" viewBox="0 0 640 360" aria-hidden="true">
-      <path
-        d="M-20 270 C 95 215, 140 260, 232 194 S 390 102, 512 154 S 600 206, 668 118"
-        fill="none"
-        stroke="#ffffff"
-        strokeLinecap="round"
-        strokeWidth="28"
-      />
-      <path
-        d="M-20 270 C 95 215, 140 260, 232 194 S 390 102, 512 154 S 600 206, 668 118"
-        fill="none"
-        stroke="#d6b982"
-        strokeDasharray="18 18"
-        strokeLinecap="round"
-        strokeWidth="5"
-      />
-      <path
-        d="M44 78 C 82 58, 128 60, 162 88"
-        fill="none"
-        stroke="#86efac"
-        strokeLinecap="round"
-        strokeWidth="5"
-      />
-      <path
-        d="M448 282 C 492 246, 548 250, 590 286"
-        fill="none"
-        stroke="#86efac"
-        strokeLinecap="round"
-        strokeWidth="5"
-      />
-    </svg>
-    <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-md bg-white/95 px-3 py-2 text-sm font-medium text-slate-600 shadow-sm ring-1 ring-black/5">
-      <LoadingSpinner className="text-blue-700" />
-      Generuji náhled
+const MapPreviewSkeleton = ({ language }: { language: Language }) => {
+  const t = translations[language].exportDialog
+
+  return (
+    <div className="relative h-full w-full overflow-hidden bg-emerald-50">
+      <SkeletonBlock className="absolute -left-10 top-5 h-36 w-52 rounded-[48%] bg-emerald-200/70" />
+      <SkeletonBlock className="absolute right-8 top-8 h-28 w-44 rounded-[45%] bg-lime-200/70" />
+      <SkeletonBlock className="absolute bottom-6 left-10 h-32 w-56 rounded-[50%] bg-green-200/70" />
+      <SkeletonBlock className="absolute bottom-12 right-4 h-36 w-52 rounded-[48%] bg-emerald-200/60" />
+      <div className="absolute -right-8 top-1/3 h-16 w-56 rotate-[-18deg] rounded-full bg-sky-100/80 shadow-inner" />
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 640 360" aria-hidden="true">
+        <path
+          d="M-20 270 C 95 215, 140 260, 232 194 S 390 102, 512 154 S 600 206, 668 118"
+          fill="none"
+          stroke="#ffffff"
+          strokeLinecap="round"
+          strokeWidth="28"
+        />
+        <path
+          d="M-20 270 C 95 215, 140 260, 232 194 S 390 102, 512 154 S 600 206, 668 118"
+          fill="none"
+          stroke="#d6b982"
+          strokeDasharray="18 18"
+          strokeLinecap="round"
+          strokeWidth="5"
+        />
+        <path
+          d="M44 78 C 82 58, 128 60, 162 88"
+          fill="none"
+          stroke="#86efac"
+          strokeLinecap="round"
+          strokeWidth="5"
+        />
+        <path
+          d="M448 282 C 492 246, 548 250, 590 286"
+          fill="none"
+          stroke="#86efac"
+          strokeLinecap="round"
+          strokeWidth="5"
+        />
+      </svg>
+      <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-md bg-white/95 px-3 py-2 text-sm font-medium text-slate-600 shadow-sm ring-1 ring-black/5">
+        <LoadingSpinner className="text-blue-700" />
+        {t.previewLoading}
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 export const MapImageExportDialog = ({
   freeSegments,
+  language,
   mapRef,
   mapTone,
   onOpenChange,
@@ -130,6 +127,7 @@ export const MapImageExportDialog = ({
   showTouristOverlay,
   tileUrl
 }: Props) => {
+  const t = translations[language].exportDialog
   const [mode, setMode] = useState<ExportMode>("view")
   const [scaleMeters, setScaleMeters] = useState(EXPORT_SCALE_OPTIONS[2].meters)
   const [centerSize, setCenterSize] = useState(3000)
@@ -257,7 +255,7 @@ export const MapImageExportDialog = ({
   const handleSave = async () => {
     const map = mapRef.current
     if (!map) {
-      window.alert("Mapu se nepodařilo uložit, protože ještě není načtená.")
+      window.alert(t.mapLoadAlert)
       return
     }
     setIsSaving(true)
@@ -277,7 +275,7 @@ export const MapImageExportDialog = ({
       downloadCanvas(canvas)
     } catch (error) {
       console.error("Map image export failed:", error)
-      window.alert("Obrázek se nepodařilo uložit. Některá mapa nebo vrstva blokuje export.")
+      window.alert(t.saveFailed)
     } finally {
       setIsSaving(false)
     }
@@ -296,14 +294,14 @@ export const MapImageExportDialog = ({
         <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-5 py-4">
           <div className="flex items-center gap-3">
             <ImageDown className="size-5 text-blue-700" />
-            <h2 className="text-lg font-semibold">Uložit obrázek</h2>
+            <h2 className="text-lg font-semibold">{t.save}</h2>
           </div>
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
             onClick={() => onOpenChange(false)}
-            aria-label="Zavřít"
+            aria-label={t.close}
           >
             <X className="size-4" />
           </Button>
@@ -313,27 +311,27 @@ export const MapImageExportDialog = ({
           <div className="min-h-0 overflow-y-auto border-b border-slate-200 p-5 md:border-r md:border-b-0">
             <div className="space-y-5">
               <div>
-                <div className="mb-2 text-sm font-medium text-slate-700">Rozsah</div>
+                <div className="mb-2 text-sm font-medium text-slate-700">{t.scope}</div>
                 <div className="grid grid-cols-2 overflow-hidden rounded-md border border-slate-300">
                   <button
                     type="button"
                     className={`px-3 py-2 text-sm font-medium ${mode === "view" ? "bg-blue-600 text-white" : "bg-white text-slate-800 hover:bg-slate-50"}`}
                     onClick={() => setMode("view")}
                   >
-                    Aktuální výřez
+                    {t.currentView}
                   </button>
                   <button
                     type="button"
                     className={`border-l border-slate-300 px-3 py-2 text-sm font-medium ${mode === "large" ? "bg-blue-600 text-white" : "bg-white text-slate-800 hover:bg-slate-50"}`}
                     onClick={() => setMode("large")}
                   >
-                    Velká mapa
+                    {t.largeMap}
                   </button>
                 </div>
               </div>
 
               <div className={mode === "view" ? "opacity-45" : ""}>
-                <div className="mb-2 text-sm font-medium text-slate-700">Velikost obrázku</div>
+                <div className="mb-2 text-sm font-medium text-slate-700">{t.imageSize}</div>
                 <div className="grid grid-cols-2 gap-2">
                   {EXPORT_SIZE_OPTIONS.map((option) => (
                     <button
@@ -351,7 +349,7 @@ export const MapImageExportDialog = ({
               </div>
 
               <div className={mode === "view" ? "opacity-45" : ""}>
-                <div className="mb-2 text-sm font-medium text-slate-700">Měřítko mapy</div>
+                <div className="mb-2 text-sm font-medium text-slate-700">{t.mapScale}</div>
                 <div className="grid grid-cols-2 gap-2">
                   {EXPORT_SCALE_OPTIONS.map((option) => (
                     <button
@@ -365,7 +363,8 @@ export const MapImageExportDialog = ({
                         {option.label}
                       </span>
                       <span className="block text-xs text-slate-500">
-                        {EXPORT_SCALE_HINTS[option.meters] ?? "měřítko podkladu"}
+                        {t.scaleHints[option.meters as keyof typeof t.scaleHints] ??
+                          t.scaleFallback}
                       </span>
                     </button>
                   ))}
@@ -374,12 +373,17 @@ export const MapImageExportDialog = ({
 
               <div className="rounded-md bg-slate-100 p-3 text-sm text-slate-700">
                 {mode === "view"
-                  ? "Uloží se přesně aktuální výřez mapy."
-                  : `Uloží se ${formatMapDistance(largeMapWidthMeters)} x ${formatMapDistance(largeMapWidthMeters)} při měřítku ${formatMapDistance(scaleMeters)}. Výsledný PNG bude přibližně ${largeSize} x ${largeSize} px.`}
+                  ? t.viewDescription
+                  : interpolate(t.largeDescription, {
+                      height: formatMapDistance(largeMapWidthMeters),
+                      scale: formatMapDistance(scaleMeters),
+                      size: largeSize,
+                      width: formatMapDistance(largeMapWidthMeters)
+                    })}
               </div>
 
               <div className={mode === "view" ? "opacity-45" : ""}>
-                <div className="mb-2 text-sm font-medium text-slate-700">Střed velké mapy</div>
+                <div className="mb-2 text-sm font-medium text-slate-700">{t.centerTitle}</div>
                 <div className="grid grid-cols-[1fr_auto] items-center gap-3">
                   <div className="grid w-28 grid-cols-3 gap-1">
                     <div />
@@ -389,7 +393,7 @@ export const MapImageExportDialog = ({
                       size="icon-sm"
                       disabled={mode === "view"}
                       onClick={() => nudgeCenter(0, -CENTER_NUDGE_PIXELS)}
-                      aria-label="Posunout střed nahoru"
+                      aria-label={t.moveCenterUp}
                     >
                       <ArrowUp className="size-4" />
                     </Button>
@@ -400,7 +404,7 @@ export const MapImageExportDialog = ({
                       size="icon-sm"
                       disabled={mode === "view"}
                       onClick={() => nudgeCenter(-CENTER_NUDGE_PIXELS, 0)}
-                      aria-label="Posunout střed doleva"
+                      aria-label={t.moveCenterLeft}
                     >
                       <ArrowLeft className="size-4" />
                     </Button>
@@ -410,7 +414,7 @@ export const MapImageExportDialog = ({
                       size="icon-sm"
                       disabled={mode === "view" || !hasCenterOffset}
                       onClick={() => setCenterOffset({ x: 0, y: 0 })}
-                      aria-label="Vrátit aktuální střed mapy"
+                      aria-label={t.resetCenter}
                     >
                       <Crosshair className="size-4" />
                     </Button>
@@ -420,7 +424,7 @@ export const MapImageExportDialog = ({
                       size="icon-sm"
                       disabled={mode === "view"}
                       onClick={() => nudgeCenter(CENTER_NUDGE_PIXELS, 0)}
-                      aria-label="Posunout střed doprava"
+                      aria-label={t.moveCenterRight}
                     >
                       <ArrowRight className="size-4" />
                     </Button>
@@ -431,7 +435,7 @@ export const MapImageExportDialog = ({
                       size="icon-sm"
                       disabled={mode === "view"}
                       onClick={() => nudgeCenter(0, CENTER_NUDGE_PIXELS)}
-                      aria-label="Posunout střed dolů"
+                      aria-label={t.moveCenterDown}
                     >
                       <ArrowDown className="size-4" />
                     </Button>
@@ -439,8 +443,8 @@ export const MapImageExportDialog = ({
                   </div>
                   <div className="text-xs leading-5 text-slate-600">
                     {hasCenterOffset
-                      ? "Náhled i export používají posunutý střed."
-                      : "Výchozí je aktuální střed mapy."}
+                      ? t.centerMoved
+                      : t.centerDefault}
                   </div>
                 </div>
               </div>
@@ -449,11 +453,7 @@ export const MapImageExportDialog = ({
                 <div className="flex gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
                   <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                   <div>
-                    {routeVisibility === "none"
-                      ? "Trasa pravděpodobně nebude ve výsledném obrázku."
-                      : "Část trasy bude pravděpodobně mimo výsledný obrázek."}{" "}
-                    Posuňte mapu blíž k trase, zvolte větší obrázek nebo měřítko s větším
-                    pokrytím.
+                    {routeVisibility === "none" ? t.routeOutside : t.routePartiallyOutside}
                   </div>
                 </div>
               )}
@@ -464,26 +464,26 @@ export const MapImageExportDialog = ({
             <div className="min-h-0 flex-1 p-3 sm:p-4">
               <div className="grid h-full min-h-[220px] place-items-center overflow-hidden rounded-md border border-slate-300 bg-white md:min-h-0">
                 {isGeneratingPreview ? (
-                  <MapPreviewSkeleton />
+                  <MapPreviewSkeleton language={language} />
                 ) : previewUrl ? (
                   <img
                     src={previewUrl}
-                    alt="Náhled exportu mapy"
+                    alt={t.imageAlt}
                     className="max-h-full max-w-full object-contain"
                   />
                 ) : (
-                  <div className="text-sm text-slate-500">Náhled není dostupný</div>
+                  <div className="text-sm text-slate-500">{t.noPreview}</div>
                 )}
               </div>
             </div>
 
             <div className="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-5 py-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Zavřít
+                {t.close}
               </Button>
               <Button type="button" onClick={handleSave} disabled={isSaving}>
                 {isSaving ? <LoadingSpinner /> : <Download className="size-4" />}
-                {isSaving ? "Ukládám…" : "Uložit obrázek"}
+                {isSaving ? t.saving : t.save}
               </Button>
             </div>
           </div>

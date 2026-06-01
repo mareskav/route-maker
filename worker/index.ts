@@ -1,7 +1,9 @@
-interface Env {}
+interface Env {
+  ASSETS: Fetcher
+}
 
 export default {
-  async fetch(request: Request, _env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     if (request.method !== "GET") {
       return new Response("Method not allowed", { status: 405 })
     }
@@ -10,7 +12,11 @@ export default {
 
     const match = url.pathname.match(/^\/api\/touristOverlay\/(\d+)\/(\d+)\/(\d+)$/)
     if (!match) {
-      return new Response("Not found", { status: 404 })
+      if (url.pathname.startsWith("/api/")) {
+        return new Response("Not found", { status: 404 })
+      }
+
+      return env.ASSETS.fetch(request)
     }
 
     const [, z, x, y] = match

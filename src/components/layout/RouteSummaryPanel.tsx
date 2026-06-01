@@ -22,12 +22,15 @@ import {
   routeExportFilename
 } from "./route-summary/routeSummaryFormat"
 
+import type { Language } from "@/lib/i18n"
+import { interpolate, translations } from "@/lib/i18n"
 import { fetchElevationProfile, type ElevationProfile as Profile } from "@/lib/routing/elevation"
 import type { RouteSegmentSummary } from "@/lib/routing/routeGeometry"
 import type { RouteType } from "@/lib/routing/routeTypes"
 
 type Props = {
   apiKey: string
+  language: Language
   onRouteTypeChange: (routeType: RouteType) => void
   onCollapsedChange: (isCollapsed: boolean) => void
   routeDurationSeconds: number
@@ -83,6 +86,7 @@ const calculateSegmentElevation = (profile: Profile, startMeters: number, endMet
 
 export const RouteSummaryPanel = ({
   apiKey,
+  language,
   onCollapsedChange,
   onRouteTypeChange,
   routeDurationSeconds,
@@ -91,6 +95,7 @@ export const RouteSummaryPanel = ({
   routeSegmentSummaries,
   routeType
 }: Props) => {
+  const t = translations[language].routeSummary
   const [profile, setProfile] = useState<Profile | null>(null)
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle")
   const [isCollapsed, setIsCollapsed] = useState(true)
@@ -144,13 +149,13 @@ export const RouteSummaryPanel = ({
   const distanceMarks = profile
     ? [0.33, 0.66].map((ratio) => ({
         left: padding + ratio * (width - padding * 2),
-        label: formatDistance(profile.distanceMeters * ratio)
+        label: formatDistance(profile.distanceMeters * ratio, language)
       }))
     : []
   const ascentLabel = profile ? formatElevation(profile.ascentMeters) : "--"
   const descentLabel = profile ? formatElevation(profile.descentMeters) : "--"
   const durationLabel = formatDuration(routeDurationSeconds)
-  const lengthLabel = formatTotalDistance(routeLengthMeters)
+  const lengthLabel = formatTotalDistance(routeLengthMeters, language)
   const segmentRows = routeSegmentSummaries.map((segment) => {
     const startMeters = routeSegmentSummaries
       .filter((candidate) => candidate.to <= segment.from)
@@ -174,8 +179,15 @@ export const RouteSummaryPanel = ({
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${exportWidth}" height="${exportHeight}" viewBox="0 0 ${exportWidth} ${exportHeight}">
         <rect width="100%" height="100%" fill="#ffffff"/>
-        <text x="32" y="44" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#1f2937">Výškový profil</text>
-        <text x="32" y="76" font-family="Arial, sans-serif" font-size="15" fill="#475569">Délka ${escapeHtml(lengthLabel)} · Čas ${escapeHtml(durationLabel)} · Nahoru ${escapeHtml(ascentLabel)} · Dolů ${escapeHtml(descentLabel)}</text>
+        <text x="32" y="44" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#1f2937">${escapeHtml(t.profile)}</text>
+        <text x="32" y="76" font-family="Arial, sans-serif" font-size="15" fill="#475569">${escapeHtml(
+          interpolate(t.imageProfileSummary, {
+            ascent: ascentLabel,
+            descent: descentLabel,
+            duration: durationLabel,
+            length: lengthLabel
+          })
+        )}</text>
         <defs>
           <linearGradient id="export-elevation-fill" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stop-color="#9ca3af" stop-opacity="0.34"/>
@@ -221,7 +233,10 @@ export const RouteSummaryPanel = ({
     URL.revokeObjectURL(url)
     canvas.toBlob((pngBlob) => {
       if (!pngBlob) return
-      downloadBlob(pngBlob, routeExportFilename("vyskovy-profil", "png"))
+      downloadBlob(
+        pngBlob,
+        routeExportFilename(language === "cs" ? "vyskovy-profil" : "elevation-profile", "png")
+      )
     }, "image/png")
   }
 
@@ -237,7 +252,7 @@ export const RouteSummaryPanel = ({
             ${activeColumns
               .map((column) => {
                 if (column.id === "distance") {
-                  return `<td>${escapeHtml(formatDistance(segment.lengthMeters))}</td>`
+                  return `<td>${escapeHtml(formatDistance(segment.lengthMeters, language))}</td>`
                 }
                 if (column.id === "duration") {
                   return `<td>${escapeHtml(formatDuration(segment.durationSeconds))}</td>`
@@ -252,12 +267,20 @@ export const RouteSummaryPanel = ({
           </tr>`
       )
       .join("")
-    const headings = activeColumns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("")
+    const columnLabels = {
+      ascent: t.ascent,
+      descent: t.descent,
+      distance: t.distance,
+      duration: t.duration
+    }
+    const headings = activeColumns
+      .map((column) => `<th>${escapeHtml(columnLabels[column.id])}</th>`)
+      .join("")
     const html = `<!doctype html>
       <html>
         <head>
           <meta charset="utf-8">
-          <title>Úseky trasy</title>
+          <title>${escapeHtml(t.segmentsTitle)}</title>
           <style>
             body { font-family: Arial, sans-serif; color: #1f2937; }
             table { border-collapse: collapse; width: 100%; }
@@ -267,11 +290,18 @@ export const RouteSummaryPanel = ({
           </style>
         </head>
         <body>
-          <h1>Úseky trasy</h1>
-          <p>Délka: ${escapeHtml(lengthLabel)} · Čas: ${escapeHtml(durationLabel)} · Nahoru: ${escapeHtml(ascentLabel)} · Dolů: ${escapeHtml(descentLabel)}</p>
+          <h1>${escapeHtml(t.segmentsTitle)}</h1>
+          <p>${escapeHtml(
+            interpolate(t.summaryLine, {
+              ascent: ascentLabel,
+              descent: descentLabel,
+              duration: durationLabel,
+              length: lengthLabel
+            })
+          )}</p>
           <table>
             <thead>
-              <tr><th>Body</th>${headings}</tr>
+              <tr><th>${escapeHtml(t.points)}</th>${headings}</tr>
             </thead>
             <tbody>${rows}</tbody>
           </table>
@@ -280,7 +310,7 @@ export const RouteSummaryPanel = ({
 
     downloadBlob(
       new Blob([html], { type: "application/msword;charset=utf-8" }),
-      routeExportFilename("useky-trasy", "doc")
+      routeExportFilename(language === "cs" ? "useky-trasy" : "route-segments", "doc")
     )
   }
 
@@ -289,6 +319,7 @@ export const RouteSummaryPanel = ({
       isOpen={isRouteTypeMenuOpen}
       onOpenChange={setIsRouteTypeMenuOpen}
       onRouteTypeChange={onRouteTypeChange}
+      language={language}
       routeType={routeType}
     />
   )
@@ -304,7 +335,7 @@ export const RouteSummaryPanel = ({
             aria-expanded="false"
           >
             <Route className="size-5 shrink-0" />
-            <span className="truncate">Přehled trasy</span>
+            <span className="truncate">{t.routeOverview}</span>
             <ChevronUp className="size-4 shrink-0 text-blue-100" />
           </button>
 
@@ -336,7 +367,7 @@ export const RouteSummaryPanel = ({
             aria-expanded="true"
           >
             <Route className="size-5 shrink-0" />
-            <span>Přehled trasy</span>
+            <span>{t.routeOverview}</span>
           </button>
 
           <div className="ml-auto flex shrink-0 items-center gap-3 text-blue-100">
@@ -346,7 +377,7 @@ export const RouteSummaryPanel = ({
               onClick={() => setIsCollapsed(true)}
               aria-expanded="true"
             >
-              <span className="hidden sm:inline">Kliknutím sbalit</span>
+              <span className="hidden sm:inline">{t.collapse}</span>
               <ChevronDown className="size-4" />
             </button>
           </div>
@@ -366,7 +397,7 @@ export const RouteSummaryPanel = ({
             </div>
             <div className="col-span-3 pt-1 md:col-span-1">
               <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-blue-100">
-                Export
+                {t.export}
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -376,7 +407,7 @@ export const RouteSummaryPanel = ({
                   disabled={!profile}
                 >
                   <Download className="size-4" />
-                  Profil PNG
+                  {t.profilePng}
                 </button>
                 <button
                   type="button"
@@ -384,7 +415,7 @@ export const RouteSummaryPanel = ({
                   onClick={exportSegmentsDoc}
                 >
                   <FileText className="size-4" />
-                  Tabulka DOC
+                  {t.segmentsDoc}
                 </button>
               </div>
             </div>
@@ -393,6 +424,7 @@ export const RouteSummaryPanel = ({
           <ElevationProfileChart
             distanceMarks={distanceMarks}
             height={height}
+            language={language}
             padding={padding}
             profile={profile}
             status={status}
@@ -401,6 +433,7 @@ export const RouteSummaryPanel = ({
 
           <RouteSegmentsTable
             isElevationLoading={status === "loading"}
+            language={language}
             onVisibleColumnsChange={setVisibleSegmentColumns}
             rows={segmentRows}
             visibleColumns={visibleSegmentColumns}
@@ -408,7 +441,7 @@ export const RouteSummaryPanel = ({
         </div>
 
         <div className="absolute bottom-1.5 right-3 flex items-center gap-2 text-xs font-medium text-blue-100/90 sm:right-4">
-          <span>Udělal Vašek M. pro Michal K.</span>
+          <span>{t.footer}</span>
           <a
             href="https://github.com/mareskav/route-maker"
             target="_blank"

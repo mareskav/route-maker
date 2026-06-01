@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 
+import type { Language } from "@/lib/i18n"
+import { translations } from "@/lib/i18n"
 import type { BaseMapSet } from "@/lib/maps/mapMode"
 
 export type TileJson = {
@@ -12,9 +14,11 @@ export type TileJson = {
 type Options = {
   apiKey: string
   baseMapSet: BaseMapSet
+  language: Language
 }
 
-export const useTileJson = ({ apiKey, baseMapSet }: Options) => {
+export const useTileJson = ({ apiKey, baseMapSet, language }: Options) => {
+  const t = translations[language].tileJson
   const [tileJson, setTileJson] = useState<TileJson | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -24,7 +28,7 @@ export const useTileJson = ({ apiKey, baseMapSet }: Options) => {
 
   useEffect(() => {
     if (!apiKey) {
-      setError("Chybí VITE_MAPY_API_KEY v .env")
+      setError(t.missingApiKey)
       return
     }
 
@@ -39,7 +43,7 @@ export const useTileJson = ({ apiKey, baseMapSet }: Options) => {
         const data = (await response.json()) as TileJson
 
         if (!data.tiles?.length) {
-          throw new Error("TileJSON neobsahuje pole tiles[]")
+          throw new Error(t.missingTiles)
         }
 
         setTileJson(data)
@@ -47,7 +51,7 @@ export const useTileJson = ({ apiKey, baseMapSet }: Options) => {
         setError(caught instanceof Error ? caught.message : String(caught))
       }
     })()
-  }, [apiKey, tileJsonUrl])
+  }, [apiKey, t, tileJsonUrl])
 
   return { error, tileJson }
 }

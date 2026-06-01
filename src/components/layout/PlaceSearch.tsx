@@ -3,15 +3,19 @@ import type { FormEvent, KeyboardEvent } from "react"
 import { useEffect, useState } from "react"
 
 import { LoadingSpinner } from "@/components/ui/loading"
+import type { Language } from "@/lib/i18n"
+import { translations } from "@/lib/i18n"
 import { suggestPlaces, type PlaceSearchResult } from "@/lib/maps/geocoding"
 
 type Props = {
   apiKey: string
+  language: Language
   onSearchPlace?: (query: string) => void
   onSelectPlace?: (place: PlaceSearchResult) => void
 }
 
-export const PlaceSearch = ({ apiKey, onSearchPlace, onSelectPlace }: Props) => {
+export const PlaceSearch = ({ apiKey, language, onSearchPlace, onSelectPlace }: Props) => {
+  const t = translations[language].placeSearch
   const [query, setQuery] = useState("")
   const [suggestions, setSuggestions] = useState<PlaceSearchResult[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -88,9 +92,9 @@ export const PlaceSearch = ({ apiKey, onSearchPlace, onSelectPlace }: Props) => 
   }
 
   return (
-    <form className="relative ml-auto shrink-0 sm:order-last" onSubmit={handleSearch}>
+    <form className="relative shrink-0" onSubmit={handleSearch}>
       <label className="sr-only" htmlFor="place-search">
-        Hledej místo
+        {t.label}
       </label>
       <div className="relative">
         <input
@@ -98,7 +102,7 @@ export const PlaceSearch = ({ apiKey, onSearchPlace, onSelectPlace }: Props) => 
           className="h-9 w-40 rounded-md border border-white/25 bg-white py-1 pl-3 pr-9 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-500 focus:border-white focus:ring-2 focus:ring-white/45 sm:w-52 lg:w-72"
           type="search"
           value={query}
-          placeholder="Hledej místo..."
+          placeholder={t.placeholder}
           autoComplete="off"
           onBlur={() => window.setTimeout(() => setShowSuggestions(false), 120)}
           onChange={(event) => {
@@ -120,7 +124,7 @@ export const PlaceSearch = ({ apiKey, onSearchPlace, onSelectPlace }: Props) => 
           {isSuggesting && suggestions.length === 0 && (
             <div className="flex items-center gap-2 px-3 py-2 text-sm text-slate-500">
               <LoadingSpinner className="text-blue-700" />
-              Hledám…
+              {t.loading}
             </div>
           )}
           {suggestions.map((place, index) => (

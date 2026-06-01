@@ -1,11 +1,18 @@
-export const formatDistance = (meters: number) => {
+import type { Language } from "@/lib/i18n"
+
+const decimalPointLanguages = new Set<Language>(["en", "ja", "ko"])
+
+const formatDecimal = (value: number, language: Language) =>
+  value.toFixed(2).replace(".", decimalPointLanguages.has(language) ? "." : ",")
+
+export const formatDistance = (meters: number, language: Language = "cs") => {
   if (meters < 1000) return `${Math.round(meters)} m`
 
-  return `${(meters / 1000).toFixed(2).replace(".", ",")} km`
+  return `${formatDecimal(meters / 1000, language)} km`
 }
 
-export const formatTotalDistance = (meters: number) =>
-  `${(meters / 1000).toFixed(2).replace(".", ",")} km`
+export const formatTotalDistance = (meters: number, language: Language = "cs") =>
+  `${formatDecimal(meters / 1000, language)} km`
 
 export const formatElevation = (meters: number) => `${Math.round(meters)} m`
 

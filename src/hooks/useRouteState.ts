@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import type { RouteClickMode } from "@/components/layout/HeaderBar"
+import type { Language } from "@/lib/i18n"
+import { translations } from "@/lib/i18n"
 import { fetchRoute } from "@/lib/routing/api"
 import { downloadRouteGpx, routePointsFromGpx } from "@/lib/routing/routeFile"
 import {
@@ -35,6 +37,7 @@ const freeRouteMetersPerSecond = (routeType: RouteType) => {
 type Options = {
   apiKey: string
   clearRouteSignal: number
+  language: Language
   loadRouteRequest: { contents: string; id: number } | null
   onRoutePointCountChange: (count: number) => void
   onRouteLengthMetersChange: (meters: number) => void
@@ -48,6 +51,7 @@ type Options = {
 export const useRouteState = ({
   apiKey,
   clearRouteSignal,
+  language,
   loadRouteRequest,
   onRoutePointCountChange,
   onRouteLengthMetersChange,
@@ -57,6 +61,7 @@ export const useRouteState = ({
   showRouteMarkers,
   routeType
 }: Options) => {
+  const t = translations[language].routeFile
   const freeSegmentsRef = useRef<ReturnType<typeof buildFreeSegments>>([])
   const roadRoutesRef = useRef<RoadRoute[]>([])
   const routePointsRef = useRef<RoutePoint[]>([])
@@ -154,12 +159,12 @@ export const useRouteState = ({
 
     try {
       setMarkerContextMenu(null)
-      setRoutePoints(routePointsFromGpx(loadRouteRequest.contents))
+      setRoutePoints(routePointsFromGpx(loadRouteRequest.contents, t))
     } catch (error) {
       console.error("Route file could not be loaded:", error)
-      window.alert(error instanceof Error ? error.message : "Soubor trasy se nepodařilo načíst.")
+      window.alert(error instanceof Error ? error.message : t.loadFailed)
     }
-  }, [loadRouteRequest])
+  }, [loadRouteRequest, t])
 
   useEffect(() => {
     if (!apiKey || roadSections.length === 0) {
