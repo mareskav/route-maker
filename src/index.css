@@ -123,6 +123,32 @@
   }
 }
 
+.loading-shimmer {
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-shimmer::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(255 255 255 / 62%) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: loading-shimmer 1.45s ease-in-out infinite;
+}
+
+@keyframes loading-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 .route-map-browse,
 .route-map-browse .leaflet-grab,
 .route-map-browse .leaflet-interactive {

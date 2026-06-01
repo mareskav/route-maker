@@ -118,6 +118,7 @@ export const RouteSummaryPanel = ({
     }
 
     const controller = new AbortController()
+    setProfile(null)
     setStatus("loading")
 
     fetchElevationProfile({ apiKey, lines: routeLines, signal: controller.signal })
@@ -315,6 +316,7 @@ export const RouteSummaryPanel = ({
               compact
               descentLabel={descentLabel}
               durationLabel={durationLabel}
+              isElevationLoading={status === "loading"}
               lengthLabel={lengthLabel}
             />
           </span>
@@ -326,21 +328,29 @@ export const RouteSummaryPanel = ({
   return (
     <aside className="absolute inset-x-0 bottom-0 z-[460] border-t border-blue-500 bg-blue-600 text-white shadow-[0_-2px_12px_rgba(15,23,42,0.35)]">
       <div className="mx-auto max-w-screen-2xl px-3 py-3 sm:px-4">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between gap-3 rounded-md px-1 py-1 text-left hover:bg-white/10"
-          onClick={() => setIsCollapsed(true)}
-          aria-expanded="true"
-        >
-          <span className="flex min-w-0 items-center gap-2 text-sm font-semibold text-white">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <button
+            type="button"
+            className="flex min-w-0 items-center gap-2 rounded-md px-1 py-1 text-left text-sm font-semibold text-white hover:bg-white/10"
+            onClick={() => setIsCollapsed(true)}
+            aria-expanded="true"
+          >
             <Route className="size-5 shrink-0" />
             <span>Přehled trasy</span>
-          </span>
-          <span className="flex items-center gap-1.5 text-sm font-medium text-blue-100">
-            <span className="hidden sm:inline">Kliknutím sbalit</span>
-            <ChevronDown className="size-4" />
-          </span>
-        </button>
+          </button>
+
+          <div className="ml-auto flex shrink-0 items-center gap-3 text-blue-100">
+            <button
+              type="button"
+              className="flex items-center gap-1.5 rounded-md px-1 py-1 text-sm font-medium hover:bg-white/10"
+              onClick={() => setIsCollapsed(true)}
+              aria-expanded="true"
+            >
+              <span className="hidden sm:inline">Kliknutím sbalit</span>
+              <ChevronDown className="size-4" />
+            </button>
+          </div>
+        </div>
 
         <div className="mt-2 grid gap-3 md:grid-cols-[260px_minmax(0,520px)_1fr] md:items-start">
           <div className="grid grid-cols-3 gap-2 text-sm md:grid-cols-1">
@@ -350,6 +360,7 @@ export const RouteSummaryPanel = ({
                 ascentLabel={ascentLabel}
                 descentLabel={descentLabel}
                 durationLabel={durationLabel}
+                isElevationLoading={status === "loading"}
                 lengthLabel={lengthLabel}
               />
             </div>
@@ -389,10 +400,23 @@ export const RouteSummaryPanel = ({
           />
 
           <RouteSegmentsTable
+            isElevationLoading={status === "loading"}
             onVisibleColumnsChange={setVisibleSegmentColumns}
             rows={segmentRows}
             visibleColumns={visibleSegmentColumns}
           />
+        </div>
+
+        <div className="absolute bottom-1.5 right-3 flex items-center gap-2 text-xs font-medium text-blue-100/90 sm:right-4">
+          <span>Udělal Vašek M. pro Michal K.</span>
+          <a
+            href="https://github.com/mareskav/route-maker"
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold text-white underline-offset-2 hover:underline"
+          >
+            GitHub
+          </a>
         </div>
       </div>
     </aside>

@@ -17,12 +17,14 @@ export type SegmentRow = {
 }
 
 type Props = {
+  isElevationLoading?: boolean
   onVisibleColumnsChange: (visibleColumns: RouteSegmentColumnVisibility) => void
   rows: SegmentRow[]
   visibleColumns: RouteSegmentColumnVisibility
 }
 
 export const RouteSegmentsTable = ({
+  isElevationLoading = false,
   onVisibleColumnsChange,
   rows,
   visibleColumns
@@ -84,12 +86,20 @@ export const RouteSegmentsTable = ({
                 )}
                 {visibleColumns.ascent && (
                   <td className="px-2 py-2 text-right">
-                    {formatElevation(segment.elevation.ascentMeters)}
+                    {isElevationLoading ? (
+                      <span className="loading-shimmer ml-auto block h-3.5 w-10 rounded bg-slate-200" />
+                    ) : (
+                      formatElevation(segment.elevation.ascentMeters)
+                    )}
                   </td>
                 )}
                 {visibleColumns.descent && (
                   <td className="px-2 py-2 text-right">
-                    {formatElevation(segment.elevation.descentMeters)}
+                    {isElevationLoading ? (
+                      <span className="loading-shimmer ml-auto block h-3.5 w-10 rounded bg-slate-200" />
+                    ) : (
+                      formatElevation(segment.elevation.descentMeters)
+                    )}
                   </td>
                 )}
               </tr>

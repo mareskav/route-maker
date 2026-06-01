@@ -64,6 +64,7 @@ export const useRouteState = ({
   const [routePoints, setRoutePoints] = useState<RoutePoint[]>([])
   const [roadRoutes, setRoadRoutes] = useState<RoadRoute[]>([])
   const [markerContextMenu, setMarkerContextMenu] = useState<MarkerContextMenu | null>(null)
+  const [routingStatus, setRoutingStatus] = useState<"idle" | "loading" | "error">("idle")
 
   const freeSegments = useMemo(() => buildFreeSegments(routePoints), [routePoints])
   const roadSections = useMemo(() => buildRoadSections(routePoints), [routePoints])
@@ -163,10 +164,14 @@ export const useRouteState = ({
   useEffect(() => {
     if (!apiKey || roadSections.length === 0) {
       setRoadRoutes([])
+      setRoutingStatus("idle")
       return
     }
 
     const controller = new AbortController()
+    let cancelled = false
+    setRoutingStatus("loading")
+
     ;(async () => {
       try {
         const routes = await Promise.all(
@@ -231,6 +236,8 @@ export const useRouteState = ({
           })
         )
 
+        if (cancelled) return
+
         setRoutePoints((prev) => {
           const next = [...prev]
           let changed = false
@@ -266,13 +273,18 @@ export const useRouteState = ({
               segmentLengthsMeters: route.segmentLengthsMeters
             }))
         )
+        setRoutingStatus("idle")
       } catch (error: unknown) {
         if (error instanceof DOMException && error.name === "AbortError") return
         console.error("Routing error:", error)
+        if (!cancelled) setRoutingStatus("error")
       }
     })()
 
-    return () => controller.abort()
+    return () => {
+      cancelled = true
+      controller.abort()
+    }
   }, [apiKey, roadSections, routeType])
 
   const addRoutePoint = (lat: number, lng: number) => {
@@ -330,6 +342,7 @@ export const useRouteState = ({
     routeLengthMeters,
     routePoints,
     routeSegmentSummaries,
+    routingStatus,
     setMarkerContextMenu
   }
 }

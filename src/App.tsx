@@ -80,7 +80,7 @@ const App = () => {
           setSelectedPlaceRequest((request) => ({ place, id: (request?.id ?? 0) + 1 }))
         }
       />
-      <div className="flex-1">
+      <div className="min-h-0 flex-1">
         <MapView
           routeClickMode={routeClickMode}
           clearRouteSignal={clearRouteSignal}

@@ -15,6 +15,7 @@ import type { RefObject } from "react"
 import { useEffect, useMemo, useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { LoadingSpinner, SkeletonBlock } from "@/components/ui/loading"
 import {
   downloadCanvas,
   EXPORT_SCALE_OPTIONS,
@@ -67,6 +68,51 @@ const formatMapDistance = (meters: number) => {
 
   return Number.isInteger(kilometers) ? `${kilometers} km` : `${kilometers.toFixed(1)} km`
 }
+
+const MapPreviewSkeleton = () => (
+  <div className="relative h-full w-full overflow-hidden bg-emerald-50">
+    <SkeletonBlock className="absolute -left-10 top-5 h-36 w-52 rounded-[48%] bg-emerald-200/70" />
+    <SkeletonBlock className="absolute right-8 top-8 h-28 w-44 rounded-[45%] bg-lime-200/70" />
+    <SkeletonBlock className="absolute bottom-6 left-10 h-32 w-56 rounded-[50%] bg-green-200/70" />
+    <SkeletonBlock className="absolute bottom-12 right-4 h-36 w-52 rounded-[48%] bg-emerald-200/60" />
+    <div className="absolute -right-8 top-1/3 h-16 w-56 rotate-[-18deg] rounded-full bg-sky-100/80 shadow-inner" />
+    <svg className="absolute inset-0 h-full w-full" viewBox="0 0 640 360" aria-hidden="true">
+      <path
+        d="M-20 270 C 95 215, 140 260, 232 194 S 390 102, 512 154 S 600 206, 668 118"
+        fill="none"
+        stroke="#ffffff"
+        strokeLinecap="round"
+        strokeWidth="28"
+      />
+      <path
+        d="M-20 270 C 95 215, 140 260, 232 194 S 390 102, 512 154 S 600 206, 668 118"
+        fill="none"
+        stroke="#d6b982"
+        strokeDasharray="18 18"
+        strokeLinecap="round"
+        strokeWidth="5"
+      />
+      <path
+        d="M44 78 C 82 58, 128 60, 162 88"
+        fill="none"
+        stroke="#86efac"
+        strokeLinecap="round"
+        strokeWidth="5"
+      />
+      <path
+        d="M448 282 C 492 246, 548 250, 590 286"
+        fill="none"
+        stroke="#86efac"
+        strokeLinecap="round"
+        strokeWidth="5"
+      />
+    </svg>
+    <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-md bg-white/95 px-3 py-2 text-sm font-medium text-slate-600 shadow-sm ring-1 ring-black/5">
+      <LoadingSpinner className="text-blue-700" />
+      Generuji náhled
+    </div>
+  </div>
+)
 
 export const MapImageExportDialog = ({
   freeSegments,
@@ -418,7 +464,7 @@ export const MapImageExportDialog = ({
             <div className="min-h-0 flex-1 p-3 sm:p-4">
               <div className="grid h-full min-h-[220px] place-items-center overflow-hidden rounded-md border border-slate-300 bg-white md:min-h-0">
                 {isGeneratingPreview ? (
-                  <div className="text-sm text-slate-500">Generuji náhled…</div>
+                  <MapPreviewSkeleton />
                 ) : previewUrl ? (
                   <img
                     src={previewUrl}
@@ -436,7 +482,7 @@ export const MapImageExportDialog = ({
                 Zavřít
               </Button>
               <Button type="button" onClick={handleSave} disabled={isSaving}>
-                <Download className="size-4" />
+                {isSaving ? <LoadingSpinner /> : <Download className="size-4" />}
                 {isSaving ? "Ukládám…" : "Uložit obrázek"}
               </Button>
             </div>

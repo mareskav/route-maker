@@ -7,6 +7,7 @@ import { RouteSummaryPanel } from "@/components/layout/RouteSummaryPanel.tsx"
 import { GrayMapTiles } from "@/components/maps/GrayMapTiles.tsx"
 import { MapImageExportDialog } from "@/components/maps/MapImageExportDialog.tsx"
 import { MapInstance } from "@/components/maps/MapInstance.tsx"
+import { MapLoadingState } from "@/components/maps/MapLoadingState.tsx"
 import { MapPanes } from "@/components/maps/MapPanes.tsx"
 import { MapScale } from "@/components/maps/MapScale.tsx"
 import { TouristOverlay } from "@/components/maps/TouristOverlay.tsx"
@@ -14,6 +15,7 @@ import { MapInteractions } from "@/components/routes/MapInteractions.tsx"
 import { RouteLayers } from "@/components/routes/RouteLayers.tsx"
 import { RouteMarkerContextMenu } from "@/components/routes/RouteMarkerContextMenu.tsx"
 import { RoutePointMarker } from "@/components/routes/RoutePointMarker.tsx"
+import { LoadingSpinner } from "@/components/ui/loading"
 import { useRouteState } from "@/hooks/useRouteState.ts"
 import { useTileJson } from "@/hooks/useTileJson.ts"
 import { searchPlace, type PlaceSearchResult } from "@/lib/maps/geocoding"
@@ -69,6 +71,7 @@ export const MapView = (props: Props) => {
     routeLengthMeters,
     routePoints,
     routeSegmentSummaries,
+    routingStatus,
     setMarkerContextMenu
   } = useRouteState({
     apiKey,
@@ -148,8 +151,16 @@ export const MapView = (props: Props) => {
     return () => controller.abort()
   }, [apiKey, props.placeSearchRequest, showPlaceOnMap])
 
-  if (error) return <div style={{ padding: 16 }}>Error {error}</div>
-  if (!tileJson) return <div style={{ padding: 16 }}>Načítám mapu…</div>
+  if (error) {
+    return (
+      <div className="grid h-full place-items-center bg-slate-100 p-4 text-center text-sm text-slate-700">
+        <div className="rounded-md bg-white px-4 py-3 shadow-sm ring-1 ring-black/5">
+          Mapu se nepodařilo načíst: {error}
+        </div>
+      </div>
+    )
+  }
+  if (!tileJson) return <MapLoadingState />
 
   const tileUrl = tileJson.tiles[0]
   const attribution = tileJson.attribution ?? ""
@@ -224,9 +235,24 @@ export const MapView = (props: Props) => {
         )}
       </MapContainer>
 
-      {placeSearchStatus && (
-        <div className="pointer-events-none absolute left-1/2 top-4 z-[450] -translate-x-1/2 rounded-md bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-lg">
-          {placeSearchStatus}
+      {(placeSearchStatus || routingStatus !== "idle") && (
+        <div className="pointer-events-none absolute left-1/2 top-4 z-[450] flex -translate-x-1/2 flex-col items-center gap-2">
+          {placeSearchStatus && (
+            <div className="rounded-md bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-lg ring-1 ring-black/5">
+              {placeSearchStatus}
+            </div>
+          )}
+          {routingStatus === "loading" && (
+            <div className="flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-lg ring-1 ring-black/5">
+              <LoadingSpinner className="text-blue-700" />
+              Přepočítávám trasu
+            </div>
+          )}
+          {routingStatus === "error" && (
+            <div className="rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-800 shadow-lg ring-1 ring-red-200">
+              Trasu se nepodařilo přepočítat.
+            </div>
+          )}
         </div>
       )}
 

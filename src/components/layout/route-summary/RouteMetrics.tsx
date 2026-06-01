@@ -6,6 +6,7 @@ type Props = {
   durationLabel: string
   lengthLabel: string
   compact?: boolean
+  isElevationLoading?: boolean
 }
 
 export const RouteMetrics = ({
@@ -13,9 +14,11 @@ export const RouteMetrics = ({
   compact = false,
   descentLabel,
   durationLabel,
+  isElevationLoading = false,
   lengthLabel
 }: Props) => {
   const iconClass = compact ? "size-4 text-blue-100" : "size-5 text-blue-100"
+  const skeletonClass = compact ? "h-3 w-8" : "h-3.5 w-10"
 
   return (
     <>
@@ -29,11 +32,19 @@ export const RouteMetrics = ({
       </span>
       <span className="flex items-center gap-1">
         <ArrowUpRight className={iconClass} />
-        {ascentLabel}
+        {isElevationLoading ? (
+          <span className={`loading-shimmer rounded bg-blue-200/70 ${skeletonClass}`} />
+        ) : (
+          ascentLabel
+        )}
       </span>
       <span className="flex items-center gap-1">
         <ArrowDownRight className={iconClass} />
-        {descentLabel}
+        {isElevationLoading ? (
+          <span className={`loading-shimmer rounded bg-blue-200/70 ${skeletonClass}`} />
+        ) : (
+          descentLabel
+        )}
       </span>
     </>
   )

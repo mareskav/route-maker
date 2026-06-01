@@ -2,6 +2,7 @@ import { MapPin, Search } from "lucide-react"
 import type { FormEvent, KeyboardEvent } from "react"
 import { useEffect, useState } from "react"
 
+import { LoadingSpinner } from "@/components/ui/loading"
 import { suggestPlaces, type PlaceSearchResult } from "@/lib/maps/geocoding"
 
 type Props = {
@@ -15,31 +16,41 @@ export const PlaceSearch = ({ apiKey, onSearchPlace, onSelectPlace }: Props) => 
   const [suggestions, setSuggestions] = useState<PlaceSearchResult[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0)
+  const [isSuggesting, setIsSuggesting] = useState(false)
 
   useEffect(() => {
     const trimmedQuery = query.trim()
     if (!apiKey || trimmedQuery.length < 2) {
       setSuggestions([])
       setShowSuggestions(false)
+      setIsSuggesting(false)
       return
     }
 
     const controller = new AbortController()
+    let cancelled = false
     const timeout = window.setTimeout(() => {
+      setIsSuggesting(true)
       suggestPlaces({ apiKey, query: trimmedQuery, signal: controller.signal })
         .then((nextSuggestions) => {
+          if (cancelled) return
           setSuggestions(nextSuggestions)
           setActiveSuggestionIndex(0)
           setShowSuggestions(nextSuggestions.length > 0)
         })
         .catch((error: unknown) => {
           if (error instanceof DOMException && error.name === "AbortError") return
+          if (cancelled) return
           setSuggestions([])
           setShowSuggestions(false)
+        })
+        .finally(() => {
+          if (!cancelled) setIsSuggesting(false)
         })
     }, 220)
 
     return () => {
+      cancelled = true
       window.clearTimeout(timeout)
       controller.abort()
     }
@@ -97,11 +108,21 @@ export const PlaceSearch = ({ apiKey, onSearchPlace, onSelectPlace }: Props) => 
           onFocus={() => setShowSuggestions(suggestions.length > 0)}
           onKeyDown={handleKeyDown}
         />
-        <Search className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
+        {isSuggesting ? (
+          <LoadingSpinner className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-blue-700" />
+        ) : (
+          <Search className="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-slate-500" />
+        )}
       </div>
 
-      {showSuggestions && suggestions.length > 0 && (
+      {showSuggestions && (suggestions.length > 0 || isSuggesting) && (
         <div className="absolute right-0 top-full z-[1010] mt-1 w-80 overflow-hidden rounded-md bg-white text-slate-900 shadow-xl ring-1 ring-black/10">
+          {isSuggesting && suggestions.length === 0 && (
+            <div className="flex items-center gap-2 px-3 py-2 text-sm text-slate-500">
+              <LoadingSpinner className="text-blue-700" />
+              Hledám…
+            </div>
+          )}
           {suggestions.map((place, index) => (
             <button
               key={`${place.name}-${place.label}-${place.location}-${place.position.lat}-${place.position.lng}`}
