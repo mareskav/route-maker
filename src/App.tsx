@@ -19,9 +19,8 @@ const isImageExportRoute = () =>
 const initialLanguage = (): Language => {
   if (typeof window === "undefined") return "cs"
 
-  const savedLanguage = window.localStorage.getItem("route-maker-language")
-
-  return languages.includes(savedLanguage as Language) ? (savedLanguage as Language) : "cs"
+  const urlLang = new URLSearchParams(window.location.search).get("lang")
+  return languages.includes(urlLang as Language) ? (urlLang as Language) : "cs"
 }
 
 const App = () => {
@@ -55,7 +54,10 @@ const App = () => {
 
   useEffect(() => {
     document.documentElement.lang = htmlLanguageCodes[language]
-    window.localStorage.setItem("route-maker-language", language)
+
+    const url = new URL(window.location.href)
+    url.searchParams.set("lang", language)
+    window.history.replaceState(null, "", url)
   }, [language])
 
   const calculateRouteLength = useCallback((meters: number) => {
