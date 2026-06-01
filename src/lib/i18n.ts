@@ -3,6 +3,8 @@ import type { RouteType } from "@/lib/routing/routeTypes"
 export const languages = [
   "cs",
   "en",
+  "es",
+  "it",
   "de",
   "fr",
   "hu",
@@ -13,6 +15,10 @@ export const languages = [
   "vi",
   "ko",
   "ja",
+  "uk",
+  "kk",
+  "uz",
+  "ru"
 ] as const
 
 export type Language = (typeof languages)[number]
@@ -22,12 +28,18 @@ export const htmlLanguageCodes: Record<Language, string> = {
   cs: "cs",
   de: "de",
   en: "en",
+  es: "es",
   fi: "fi",
   fr: "fr",
   hu: "hu",
+  it: "it",
   ja: "ja",
+  kk: "kk",
   ko: "ko",
   pl: "pl",
+  ru: "ru",
+  uk: "uk",
+  uz: "uz",
   vi: "vi",
   sk: "sk"
 }
@@ -37,12 +49,18 @@ export const languageLabels: Record<Language, string> = {
   cs: "Čeština",
   de: "Deutsch",
   en: "English",
+  es: "Español",
   fi: "Suomi",
   fr: "Français",
   hu: "Magyar",
+  it: "Italiano",
   ja: "日本語",
+  kk: "Қазақша",
   ko: "한국어",
   pl: "Polski",
+  ru: "Русский 🛑",
+  uk: "Українська",
+  uz: "Oʻzbekcha",
   vi: "Tiếng Việt",
   sk: "Slovenština"
 }
@@ -52,12 +70,18 @@ export const languageFlagCountries: Record<Language, readonly string[]> = {
   cs: ["cz"],
   de: ["de"],
   en: ["gb"],
+  es: ["es"],
   fi: ["fi"],
   fr: ["fr"],
   hu: ["hu"],
+  it: ["it"],
   ja: ["jp"],
+  kk: ["kz"],
   ko: ["kr"],
   pl: ["pl"],
+  ru: ["ru"],
+  uk: ["ua"],
+  uz: ["uz"],
   vi: ["vn"],
   sk: ["sk"]
 }
@@ -857,6 +881,968 @@ export type Translation = DeepStringValues<(typeof baseTranslations)["en"]>
 
 export const translations = {
   ...baseTranslations,
+  es: {
+    ...baseTranslations.en,
+    appName: "Creador de rutas",
+    common: {
+      close: "Cerrar",
+      export: "Exportar",
+      github: "GitHub",
+      loadingMap: "Cargando mapa"
+    },
+    header: {
+      browse: "Explorar",
+      freeRoute: "Ruta libre",
+      language: "Idioma",
+      roadRoute: "Ruta por caminos"
+    },
+    placeSearch: {
+      label: "Buscar un lugar",
+      loading: "Buscando...",
+      placeholder: "Buscar un lugar..."
+    },
+    routeMenu: {
+      ...baseTranslations.en.routeMenu,
+      actions: "Acciones",
+      appearance: "Estilo de la ruta",
+      basicColors: "Colores básicos de la ruta",
+      clearRoute: "Borrar ruta",
+      color: "Color de la ruta:",
+      colors: {
+        blue: "azul",
+        green: "verde",
+        orange: "naranja",
+        purple: "morado",
+        red: "rojo",
+        yellow: "amarillo"
+      },
+      dash: "Línea discontinua de la ruta",
+      display: "Visualización",
+      file: "Archivo",
+      hidden: "desactivado",
+      hideMarkers: "Ocultar marcadores",
+      loadRoute: "Cargar ruta",
+      opacity: "Visibilidad de la ruta",
+      route: "Ruta",
+      saveRoute: "Guardar ruta",
+      width: "Ancho de la ruta"
+    },
+    mapMenu: {
+      aerial: "Aérea",
+      base: "Mapa base",
+      basic: "Básico",
+      color: "Color",
+      grayscale: "Blanco y negro",
+      layers: "Capas",
+      map: "Mapa",
+      mapTone: "Tono del mapa",
+      outdoor: "Exterior",
+      saveImage: "Guardar imagen",
+      touristRoutes: "Rutas turísticas",
+      winter: "Invierno"
+    },
+    mapView: {
+      missingApiKey: "Falta la clave API de Mapy.com.",
+      mapLoadFailed: "No se pudo cargar el mapa:",
+      placeNotFound: "No se encontró el lugar.",
+      routeFailed: "No se pudo recalcular la ruta.",
+      routeLoading: "Recalculando ruta",
+      searchFailed: "La búsqueda falló.",
+      searchingPlace: "Buscando lugar..."
+    },
+    routeSummary: {
+      ascent: "Ascenso",
+      collapse: "Haz clic para contraer",
+      descent: "Descenso",
+      distance: "Distancia",
+      duration: "Tiempo",
+      elevationUnavailable: "El perfil de elevación no está disponible.",
+      export: "Exportar",
+      footer: "Hecho por Vašek M. para Michal K.",
+      imageProfileSummary:
+        "Distancia {length} - Tiempo {duration} - Ascenso {ascent} - Descenso {descent}",
+      loadingElevations: "Cargando elevaciones",
+      points: "Puntos",
+      profile: "Perfil de elevación",
+      profilePng: "Perfil PNG",
+      routeOverview: "Resumen de la ruta",
+      segments: "Tramos entre puntos",
+      segmentsDoc: "Tabla DOC",
+      segmentsTitle: "Tramos de la ruta",
+      summaryLine:
+        "Distancia: {length} - Tiempo: {duration} - Ascenso: {ascent} - Descenso: {descent}"
+    },
+    routeModes: {
+      bike: "Bicicleta",
+      car: "Coche",
+      foot: "A pie",
+      route: "Ruta",
+      types: {
+        bike_mountain: "Bicicleta de montaña",
+        bike_road: "Bicicleta de carretera",
+        car_fast: "Coche rápida",
+        car_fast_traffic: "Coche rápida con tráfico",
+        car_short: "Coche corta",
+        foot_fast: "A pie rápida",
+        foot_hiking: "Senderismo"
+      }
+    },
+    exportDialog: {
+      ...baseTranslations.en.exportDialog,
+      centerDefault: "Por defecto se usa el centro actual del mapa.",
+      centerMoved: "La vista previa y la exportación usan el centro desplazado.",
+      centerTitle: "Centro del mapa grande",
+      close: "Cerrar",
+      currentView: "Vista actual",
+      imageAlt: "Vista previa de la exportación del mapa",
+      imageSize: "Tamaño de imagen",
+      largeMap: "Mapa grande",
+      mapLoadAlert: "No se pudo guardar el mapa porque aún no se ha cargado.",
+      mapScale: "Escala del mapa",
+      moveCenterDown: "Mover el centro hacia abajo",
+      moveCenterLeft: "Mover el centro hacia la izquierda",
+      moveCenterRight: "Mover el centro hacia la derecha",
+      moveCenterUp: "Mover el centro hacia arriba",
+      noPreview: "La vista previa no está disponible",
+      previewLoading: "Generando vista previa",
+      resetCenter: "Restablecer al centro actual del mapa",
+      routePartiallyOutside:
+        "Parte de la ruta probablemente quedará fuera de la imagen final. Mueve el mapa más cerca de la ruta, elige una imagen más grande o una escala con mayor cobertura.",
+      routeOutside:
+        "La ruta probablemente no aparecerá en la imagen final. Mueve el mapa más cerca de la ruta, elige una imagen más grande o una escala con mayor cobertura.",
+      save: "Guardar imagen",
+      saveFailed: "No se pudo guardar la imagen. Un mapa o una capa bloquea la exportación.",
+      saving: "Guardando...",
+      scope: "Alcance",
+      scaleFallback: "escala del mapa base",
+      scaleHints: {
+        100: "calles y caminos forestales",
+        200: "mapa turístico detallado",
+        300: "ruta con alrededores cercanos",
+        500: "pueblos y paisaje",
+        1000: "zona más amplia",
+        2000: "región",
+        5000: "vista general amplia",
+        10000: "país y alrededores"
+      },
+      viewDescription: "Se guardará exactamente la vista actual del mapa.",
+      largeDescription:
+        "Guarda {width} x {height} a escala {scale}. El PNG final tendrá aproximadamente {size} x {size} px."
+    },
+    markerMenu: {
+      removePoint: "Eliminar punto"
+    },
+    routeFile: {
+      emptyFile: "El archivo no contiene ningún punto de ruta.",
+      loadFailed: "No se pudo cargar el archivo de ruta.",
+      parseFailed: "No se pudo leer el archivo GPX."
+    },
+    tileJson: {
+      missingApiKey: "Falta VITE_MAPY_API_KEY en .env",
+      missingTiles: "TileJSON no contiene el campo tiles[]"
+    }
+  },
+  it: {
+    ...baseTranslations.en,
+    appName: "Creatore di percorsi",
+    common: {
+      close: "Chiudi",
+      export: "Esporta",
+      github: "GitHub",
+      loadingMap: "Caricamento mappa"
+    },
+    header: {
+      browse: "Esplora",
+      freeRoute: "Percorso libero",
+      language: "Lingua",
+      roadRoute: "Percorso su strade"
+    },
+    placeSearch: {
+      label: "Cerca un luogo",
+      loading: "Ricerca...",
+      placeholder: "Cerca un luogo..."
+    },
+    routeMenu: {
+      ...baseTranslations.en.routeMenu,
+      actions: "Azioni",
+      appearance: "Stile del percorso",
+      basicColors: "Colori base del percorso",
+      clearRoute: "Cancella percorso",
+      color: "Colore del percorso:",
+      colors: {
+        blue: "blu",
+        green: "verde",
+        orange: "arancione",
+        purple: "viola",
+        red: "rosso",
+        yellow: "giallo"
+      },
+      dash: "Tratteggio del percorso",
+      display: "Visualizzazione",
+      file: "File",
+      hidden: "disattivato",
+      hideMarkers: "Nascondi indicatori",
+      loadRoute: "Carica percorso",
+      opacity: "Visibilità del percorso",
+      route: "Percorso",
+      saveRoute: "Salva percorso",
+      width: "Larghezza del percorso"
+    },
+    mapMenu: {
+      aerial: "Aerea",
+      base: "Mappa base",
+      basic: "Base",
+      color: "Colore",
+      grayscale: "Bianco e nero",
+      layers: "Livelli",
+      map: "Mappa",
+      mapTone: "Tono della mappa",
+      outdoor: "Outdoor",
+      saveImage: "Salva immagine",
+      touristRoutes: "Percorsi turistici",
+      winter: "Inverno"
+    },
+    mapView: {
+      missingApiKey: "Manca la chiave API di Mapy.com.",
+      mapLoadFailed: "Impossibile caricare la mappa:",
+      placeNotFound: "Luogo non trovato.",
+      routeFailed: "Impossibile ricalcolare il percorso.",
+      routeLoading: "Ricalcolo percorso",
+      searchFailed: "Ricerca non riuscita.",
+      searchingPlace: "Ricerca luogo..."
+    },
+    routeSummary: {
+      ascent: "Salita",
+      collapse: "Fai clic per comprimere",
+      descent: "Discesa",
+      distance: "Distanza",
+      duration: "Tempo",
+      elevationUnavailable: "Il profilo altimetrico non è disponibile.",
+      export: "Esporta",
+      footer: "Realizzato da Vašek M. per Michal K.",
+      imageProfileSummary:
+        "Distanza {length} - Tempo {duration} - Salita {ascent} - Discesa {descent}",
+      loadingElevations: "Caricamento altitudini",
+      points: "Punti",
+      profile: "Profilo altimetrico",
+      profilePng: "Profilo PNG",
+      routeOverview: "Panoramica del percorso",
+      segments: "Tratti tra i punti",
+      segmentsDoc: "Tabella DOC",
+      segmentsTitle: "Tratti del percorso",
+      summaryLine: "Distanza: {length} - Tempo: {duration} - Salita: {ascent} - Discesa: {descent}"
+    },
+    routeModes: {
+      bike: "Bici",
+      car: "Auto",
+      foot: "A piedi",
+      route: "Percorso",
+      types: {
+        bike_mountain: "Mountain bike",
+        bike_road: "Bici da strada",
+        car_fast: "Auto veloce",
+        car_fast_traffic: "Auto veloce con traffico",
+        car_short: "Auto breve",
+        foot_fast: "A piedi veloce",
+        foot_hiking: "Escursionismo"
+      }
+    },
+    exportDialog: {
+      ...baseTranslations.en.exportDialog,
+      centerDefault: "Per impostazione predefinita si usa il centro attuale della mappa.",
+      centerMoved: "Anteprima ed esportazione usano il centro spostato.",
+      centerTitle: "Centro della mappa grande",
+      close: "Chiudi",
+      currentView: "Vista attuale",
+      imageAlt: "Anteprima dell'esportazione della mappa",
+      imageSize: "Dimensione immagine",
+      largeMap: "Mappa grande",
+      mapLoadAlert: "Impossibile salvare la mappa perché non è ancora stata caricata.",
+      mapScale: "Scala della mappa",
+      moveCenterDown: "Sposta il centro verso il basso",
+      moveCenterLeft: "Sposta il centro a sinistra",
+      moveCenterRight: "Sposta il centro a destra",
+      moveCenterUp: "Sposta il centro verso l'alto",
+      noPreview: "Anteprima non disponibile",
+      previewLoading: "Generazione anteprima",
+      resetCenter: "Ripristina il centro attuale della mappa",
+      routePartiallyOutside:
+        "Parte del percorso probabilmente resterà fuori dall'immagine finale. Sposta la mappa più vicino al percorso, scegli un'immagine più grande o una scala con copertura più ampia.",
+      routeOutside:
+        "Il percorso probabilmente non apparirà nell'immagine finale. Sposta la mappa più vicino al percorso, scegli un'immagine più grande o una scala con copertura più ampia.",
+      save: "Salva immagine",
+      saveFailed:
+        "Impossibile salvare l'immagine. Una mappa o un livello sta bloccando l'esportazione.",
+      saving: "Salvataggio...",
+      scope: "Ambito",
+      scaleFallback: "scala della mappa base",
+      scaleHints: {
+        100: "strade e sentieri forestali",
+        200: "mappa turistica dettagliata",
+        300: "percorso con dintorni vicini",
+        500: "città e paesaggio",
+        1000: "area più ampia",
+        2000: "regione",
+        5000: "ampia panoramica",
+        10000: "paese e dintorni"
+      },
+      viewDescription: "La vista attuale della mappa verrà salvata esattamente.",
+      largeDescription:
+        "Salva {width} x {height} alla scala {scale}. Il PNG finale sarà di circa {size} x {size} px."
+    },
+    markerMenu: {
+      removePoint: "Elimina punto"
+    },
+    routeFile: {
+      emptyFile: "Il file non contiene punti del percorso.",
+      loadFailed: "Impossibile caricare il file del percorso.",
+      parseFailed: "Impossibile leggere il file GPX."
+    },
+    tileJson: {
+      missingApiKey: "Manca VITE_MAPY_API_KEY in .env",
+      missingTiles: "TileJSON non contiene il campo tiles[]"
+    }
+  },
+  uk: {
+    ...baseTranslations.en,
+    appName: "Планувальник маршрутів",
+    common: {
+      close: "Закрити",
+      export: "Експорт",
+      github: "GitHub",
+      loadingMap: "Завантаження карти"
+    },
+    header: {
+      browse: "Перегляд",
+      freeRoute: "Вільний маршрут",
+      language: "Мова",
+      roadRoute: "Маршрут дорогами"
+    },
+    placeSearch: {
+      label: "Пошук місця",
+      loading: "Пошук...",
+      placeholder: "Пошук місця..."
+    },
+    routeMenu: {
+      ...baseTranslations.en.routeMenu,
+      actions: "Дії",
+      appearance: "Стиль маршруту",
+      basicColors: "Основні кольори маршруту",
+      clearRoute: "Очистити маршрут",
+      color: "Колір маршруту:",
+      colors: {
+        blue: "синій",
+        green: "зелений",
+        orange: "помаранчевий",
+        purple: "фіолетовий",
+        red: "червоний",
+        yellow: "жовтий"
+      },
+      dash: "Пунктир маршруту",
+      display: "Відображення",
+      file: "Файл",
+      hidden: "вимкнено",
+      hideMarkers: "Сховати маркери",
+      loadRoute: "Завантажити маршрут",
+      opacity: "Видимість маршруту",
+      route: "Маршрут",
+      saveRoute: "Зберегти маршрут",
+      width: "Ширина маршруту"
+    },
+    mapMenu: {
+      aerial: "Аерофото",
+      base: "Базова карта",
+      basic: "Базова",
+      color: "Кольорова",
+      grayscale: "Чорно-біла",
+      layers: "Шари",
+      map: "Карта",
+      mapTone: "Тон карти",
+      outdoor: "Туристична",
+      saveImage: "Зберегти зображення",
+      touristRoutes: "Туристичні маршрути",
+      winter: "Зимова"
+    },
+    mapView: {
+      missingApiKey: "Відсутній API-ключ Mapy.com.",
+      mapLoadFailed: "Не вдалося завантажити карту:",
+      placeNotFound: "Місце не знайдено.",
+      routeFailed: "Не вдалося перерахувати маршрут.",
+      routeLoading: "Перерахунок маршруту",
+      searchFailed: "Пошук не вдався.",
+      searchingPlace: "Пошук місця..."
+    },
+    routeSummary: {
+      ascent: "Підйом",
+      collapse: "Натисніть, щоб згорнути",
+      descent: "Спуск",
+      distance: "Відстань",
+      duration: "Час",
+      elevationUnavailable: "Профіль висот недоступний.",
+      export: "Експорт",
+      footer: "Зробив Vašek M. для Michal K.",
+      imageProfileSummary: "Відстань {length} - Час {duration} - Підйом {ascent} - Спуск {descent}",
+      loadingElevations: "Завантаження висот",
+      points: "Точки",
+      profile: "Профіль висот",
+      profilePng: "Профіль PNG",
+      routeOverview: "Огляд маршруту",
+      segments: "Відрізки між точками",
+      segmentsDoc: "Таблиця DOC",
+      segmentsTitle: "Відрізки маршруту",
+      summaryLine: "Відстань: {length} - Час: {duration} - Підйом: {ascent} - Спуск: {descent}"
+    },
+    routeModes: {
+      bike: "Велосипед",
+      car: "Авто",
+      foot: "Пішки",
+      route: "Маршрут",
+      types: {
+        bike_mountain: "Гірський велосипед",
+        bike_road: "Шосейний велосипед",
+        car_fast: "Авто швидкий",
+        car_fast_traffic: "Авто швидкий з трафіком",
+        car_short: "Авто короткий",
+        foot_fast: "Пішки швидко",
+        foot_hiking: "Пішохідний туризм"
+      }
+    },
+    exportDialog: {
+      ...baseTranslations.en.exportDialog,
+      centerDefault: "За замовчуванням використовується поточний центр карти.",
+      centerMoved: "Попередній перегляд і експорт використовують зміщений центр.",
+      centerTitle: "Центр великої карти",
+      close: "Закрити",
+      currentView: "Поточний вигляд",
+      imageAlt: "Попередній перегляд експорту карти",
+      imageSize: "Розмір зображення",
+      largeMap: "Велика карта",
+      mapLoadAlert: "Не вдалося зберегти карту, бо вона ще не завантажена.",
+      mapScale: "Масштаб карти",
+      moveCenterDown: "Змістити центр вниз",
+      moveCenterLeft: "Змістити центр ліворуч",
+      moveCenterRight: "Змістити центр праворуч",
+      moveCenterUp: "Змістити центр вгору",
+      noPreview: "Попередній перегляд недоступний",
+      previewLoading: "Створення попереднього перегляду",
+      resetCenter: "Повернути поточний центр карти",
+      routePartiallyOutside:
+        "Частина маршруту, ймовірно, буде поза фінальним зображенням. Перемістіть карту ближче до маршруту, виберіть більше зображення або масштаб із ширшим охопленням.",
+      routeOutside:
+        "Маршрут, ймовірно, не потрапить у фінальне зображення. Перемістіть карту ближче до маршруту, виберіть більше зображення або масштаб із ширшим охопленням.",
+      save: "Зберегти зображення",
+      saveFailed: "Не вдалося зберегти зображення. Карта або шар блокує експорт.",
+      saving: "Збереження...",
+      scope: "Область",
+      scaleFallback: "масштаб базової карти",
+      scaleHints: {
+        100: "вулиці та лісові дороги",
+        200: "детальна туристична карта",
+        300: "маршрут із найближчим оточенням",
+        500: "міста та ландшафт",
+        1000: "ширша область",
+        2000: "регіон",
+        5000: "великий огляд",
+        10000: "країна та околиці"
+      },
+      viewDescription: "Буде збережено саме поточний вигляд карти.",
+      largeDescription:
+        "Зберігає {width} x {height} у масштабі {scale}. Фінальний PNG буде приблизно {size} x {size} px."
+    },
+    markerMenu: {
+      removePoint: "Видалити точку"
+    },
+    routeFile: {
+      emptyFile: "Файл не містить жодної точки маршруту.",
+      loadFailed: "Не вдалося завантажити файл маршруту.",
+      parseFailed: "Не вдалося прочитати GPX-файл."
+    },
+    tileJson: {
+      missingApiKey: "Відсутній VITE_MAPY_API_KEY у .env",
+      missingTiles: "TileJSON не містить поля tiles[]"
+    }
+  },
+  kk: {
+    ...baseTranslations.en,
+    appName: "Маршрут жоспарлаушы",
+    common: {
+      close: "Жабу",
+      export: "Экспорт",
+      github: "GitHub",
+      loadingMap: "Карта жүктелуде"
+    },
+    header: {
+      browse: "Қарау",
+      freeRoute: "Еркін маршрут",
+      language: "Тіл",
+      roadRoute: "Жолдар бойынша маршрут"
+    },
+    placeSearch: {
+      label: "Орын іздеу",
+      loading: "Ізделуде...",
+      placeholder: "Орын іздеу..."
+    },
+    routeMenu: {
+      ...baseTranslations.en.routeMenu,
+      actions: "Әрекеттер",
+      appearance: "Маршрут стилі",
+      basicColors: "Маршруттың негізгі түстері",
+      clearRoute: "Маршрутты тазалау",
+      color: "Маршрут түсі:",
+      colors: {
+        blue: "көк",
+        green: "жасыл",
+        orange: "қызғылт сары",
+        purple: "күлгін",
+        red: "қызыл",
+        yellow: "сары"
+      },
+      dash: "Маршруттың үзік сызығы",
+      display: "Көрсету",
+      file: "Файл",
+      hidden: "өшірулі",
+      hideMarkers: "Маркерлерді жасыру",
+      loadRoute: "Маршрутты жүктеу",
+      opacity: "Маршруттың көрінуі",
+      route: "Маршрут",
+      saveRoute: "Маршрутты сақтау",
+      width: "Маршрут ені"
+    },
+    mapMenu: {
+      aerial: "Әуе",
+      base: "Негізгі карта",
+      basic: "Негізгі",
+      color: "Түсті",
+      grayscale: "Ақ-қара",
+      layers: "Қабаттар",
+      map: "Карта",
+      mapTone: "Карта реңкі",
+      outdoor: "Туристік",
+      saveImage: "Суретті сақтау",
+      touristRoutes: "Туристік маршруттар",
+      winter: "Қысқы"
+    },
+    mapView: {
+      missingApiKey: "Mapy.com API кілті жоқ.",
+      mapLoadFailed: "Картаны жүктеу мүмкін болмады:",
+      placeNotFound: "Орын табылмады.",
+      routeFailed: "Маршрутты қайта есептеу мүмкін болмады.",
+      routeLoading: "Маршрут қайта есептелуде",
+      searchFailed: "Іздеу сәтсіз аяқталды.",
+      searchingPlace: "Орын ізделуде..."
+    },
+    routeSummary: {
+      ascent: "Көтерілу",
+      collapse: "Жию үшін басыңыз",
+      descent: "Түсу",
+      distance: "Қашықтық",
+      duration: "Уақыт",
+      elevationUnavailable: "Биіктік профилі қолжетімді емес.",
+      export: "Экспорт",
+      footer: "Vašek M. Michal K. үшін жасады",
+      imageProfileSummary:
+        "Қашықтық {length} - Уақыт {duration} - Көтерілу {ascent} - Түсу {descent}",
+      loadingElevations: "Биіктіктер жүктелуде",
+      points: "Нүктелер",
+      profile: "Биіктік профилі",
+      profilePng: "Профиль PNG",
+      routeOverview: "Маршрут шолуы",
+      segments: "Нүктелер арасындағы бөліктер",
+      segmentsDoc: "Кесте DOC",
+      segmentsTitle: "Маршрут бөліктері",
+      summaryLine: "Қашықтық: {length} - Уақыт: {duration} - Көтерілу: {ascent} - Түсу: {descent}"
+    },
+    routeModes: {
+      bike: "Велосипед",
+      car: "Көлік",
+      foot: "Жаяу",
+      route: "Маршрут",
+      types: {
+        bike_mountain: "Тау велосипеді",
+        bike_road: "Шосселік велосипед",
+        car_fast: "Көлік жылдам",
+        car_fast_traffic: "Көлік жылдам, трафикпен",
+        car_short: "Көлік қысқа",
+        foot_fast: "Жаяу жылдам",
+        foot_hiking: "Жаяу туризм"
+      }
+    },
+    exportDialog: {
+      ...baseTranslations.en.exportDialog,
+      centerDefault: "Әдепкі бойынша картаның ағымдағы ортасы қолданылады.",
+      centerMoved: "Алдын ала қарау және экспорт жылжытылған ортаны қолданады.",
+      centerTitle: "Үлкен картаның ортасы",
+      close: "Жабу",
+      currentView: "Ағымдағы көрініс",
+      imageAlt: "Карта экспортының алдын ала көрінісі",
+      imageSize: "Сурет өлшемі",
+      largeMap: "Үлкен карта",
+      mapLoadAlert: "Карта әлі жүктелмегендіктен, оны сақтау мүмкін емес.",
+      mapScale: "Карта масштабы",
+      moveCenterDown: "Ортаны төмен жылжыту",
+      moveCenterLeft: "Ортаны солға жылжыту",
+      moveCenterRight: "Ортаны оңға жылжыту",
+      moveCenterUp: "Ортаны жоғары жылжыту",
+      noPreview: "Алдын ала қарау қолжетімді емес",
+      previewLoading: "Алдын ала көрініс жасалуда",
+      resetCenter: "Картаның ағымдағы ортасына қайтару",
+      routePartiallyOutside:
+        "Маршруттың бір бөлігі соңғы суреттен тыс қалуы мүмкін. Картаны маршрутқа жақындатыңыз, үлкенірек сурет таңдаңыз немесе қамтуы кеңірек масштабты қолданыңыз.",
+      routeOutside:
+        "Маршрут соңғы суретке түспеуі мүмкін. Картаны маршрутқа жақындатыңыз, үлкенірек сурет таңдаңыз немесе қамтуы кеңірек масштабты қолданыңыз.",
+      save: "Суретті сақтау",
+      saveFailed: "Суретті сақтау мүмкін болмады. Карта немесе қабат экспортты бұғаттап тұр.",
+      saving: "Сақталуда...",
+      scope: "Ауқым",
+      scaleFallback: "негізгі карта масштабы",
+      scaleHints: {
+        100: "көшелер мен орман жолдары",
+        200: "егжей-тегжейлі туристік карта",
+        300: "маршрут және жақын маң",
+        500: "қалалар мен ландшафт",
+        1000: "кеңірек аймақ",
+        2000: "өңір",
+        5000: "үлкен шолу",
+        10000: "ел және айналасы"
+      },
+      viewDescription: "Картаның ағымдағы көрінісі дәл сақталады.",
+      largeDescription:
+        "{scale} масштабында {width} x {height} сақтайды. Соңғы PNG шамамен {size} x {size} px болады."
+    },
+    markerMenu: {
+      removePoint: "Нүктені жою"
+    },
+    routeFile: {
+      emptyFile: "Файлда маршрут нүктелері жоқ.",
+      loadFailed: "Маршрут файлын жүктеу мүмкін болмады.",
+      parseFailed: "GPX файлын оқу мүмкін болмады."
+    },
+    tileJson: {
+      missingApiKey: ".env ішінде VITE_MAPY_API_KEY жоқ",
+      missingTiles: "TileJSON ішінде tiles[] өрісі жоқ"
+    }
+  },
+  uz: {
+    ...baseTranslations.en,
+    appName: "Marshrut tuzuvchi",
+    common: {
+      close: "Yopish",
+      export: "Eksport",
+      github: "GitHub",
+      loadingMap: "Xarita yuklanmoqda"
+    },
+    header: {
+      browse: "Koʻrish",
+      freeRoute: "Erkin marshrut",
+      language: "Til",
+      roadRoute: "Yoʻllar boʻylab marshrut"
+    },
+    placeSearch: {
+      label: "Joy qidirish",
+      loading: "Qidirilmoqda...",
+      placeholder: "Joy qidirish..."
+    },
+    routeMenu: {
+      ...baseTranslations.en.routeMenu,
+      actions: "Amallar",
+      appearance: "Marshrut uslubi",
+      basicColors: "Marshrutning asosiy ranglari",
+      clearRoute: "Marshrutni tozalash",
+      color: "Marshrut rangi:",
+      colors: {
+        blue: "koʻk",
+        green: "yashil",
+        orange: "toʻq sariq",
+        purple: "binafsha",
+        red: "qizil",
+        yellow: "sariq"
+      },
+      dash: "Marshrut shtrixi",
+      display: "Koʻrsatish",
+      file: "Fayl",
+      hidden: "oʻchiq",
+      hideMarkers: "Belgilarni yashirish",
+      loadRoute: "Marshrutni yuklash",
+      opacity: "Marshrut koʻrinishi",
+      route: "Marshrut",
+      saveRoute: "Marshrutni saqlash",
+      width: "Marshrut kengligi"
+    },
+    mapMenu: {
+      aerial: "Havodan",
+      base: "Asosiy xarita",
+      basic: "Asosiy",
+      color: "Rangli",
+      grayscale: "Oq-qora",
+      layers: "Qatlamlar",
+      map: "Xarita",
+      mapTone: "Xarita ohangi",
+      outdoor: "Sayohat",
+      saveImage: "Rasmni saqlash",
+      touristRoutes: "Sayyohlik yoʻnalishlari",
+      winter: "Qishki"
+    },
+    mapView: {
+      missingApiKey: "Mapy.com API kaliti yoʻq.",
+      mapLoadFailed: "Xaritani yuklab boʻlmadi:",
+      placeNotFound: "Joy topilmadi.",
+      routeFailed: "Marshrutni qayta hisoblab boʻlmadi.",
+      routeLoading: "Marshrut qayta hisoblanmoqda",
+      searchFailed: "Qidiruv amalga oshmadi.",
+      searchingPlace: "Joy qidirilmoqda..."
+    },
+    routeSummary: {
+      ascent: "Koʻtarilish",
+      collapse: "Yigʻish uchun bosing",
+      descent: "Tushish",
+      distance: "Masofa",
+      duration: "Vaqt",
+      elevationUnavailable: "Balandlik profili mavjud emas.",
+      export: "Eksport",
+      footer: "Vašek M. tomonidan Michal K. uchun yaratilgan",
+      imageProfileSummary:
+        "Masofa {length} - Vaqt {duration} - Koʻtarilish {ascent} - Tushish {descent}",
+      loadingElevations: "Balandliklar yuklanmoqda",
+      points: "Nuqtalar",
+      profile: "Balandlik profili",
+      profilePng: "Profil PNG",
+      routeOverview: "Marshrut sharhi",
+      segments: "Nuqtalar orasidagi qismlar",
+      segmentsDoc: "Jadval DOC",
+      segmentsTitle: "Marshrut qismlari",
+      summaryLine:
+        "Masofa: {length} - Vaqt: {duration} - Koʻtarilish: {ascent} - Tushish: {descent}"
+    },
+    routeModes: {
+      bike: "Velosiped",
+      car: "Avtomobil",
+      foot: "Piyoda",
+      route: "Marshrut",
+      types: {
+        bike_mountain: "Togʻ velosipedi",
+        bike_road: "Shosse velosipedi",
+        car_fast: "Avtomobil tezkor",
+        car_fast_traffic: "Avtomobil tezkor, tirbandlik bilan",
+        car_short: "Avtomobil qisqa",
+        foot_fast: "Piyoda tezkor",
+        foot_hiking: "Piyoda sayohat"
+      }
+    },
+    exportDialog: {
+      ...baseTranslations.en.exportDialog,
+      centerDefault: "Standart holatda xaritaning joriy markazi ishlatiladi.",
+      centerMoved: "Oldindan koʻrish va eksport siljitilgan markazdan foydalanadi.",
+      centerTitle: "Katta xarita markazi",
+      close: "Yopish",
+      currentView: "Joriy koʻrinish",
+      imageAlt: "Xarita eksporti oldindan koʻrish",
+      imageSize: "Rasm oʻlchami",
+      largeMap: "Katta xarita",
+      mapLoadAlert: "Xarita hali yuklanmagani uchun uni saqlab boʻlmadi.",
+      mapScale: "Xarita masshtabi",
+      moveCenterDown: "Markazni pastga siljitish",
+      moveCenterLeft: "Markazni chapga siljitish",
+      moveCenterRight: "Markazni oʻngga siljitish",
+      moveCenterUp: "Markazni yuqoriga siljitish",
+      noPreview: "Oldindan koʻrish mavjud emas",
+      previewLoading: "Oldindan koʻrish yaratilmoqda",
+      resetCenter: "Xaritaning joriy markaziga qaytarish",
+      routePartiallyOutside:
+        "Marshrutning bir qismi yakuniy rasm tashqarisida qolishi mumkin. Xaritani marshrutga yaqinroq suring, kattaroq rasm tanlang yoki qamrovi kengroq masshtabdan foydalaning.",
+      routeOutside:
+        "Marshrut yakuniy rasmga tushmasligi mumkin. Xaritani marshrutga yaqinroq suring, kattaroq rasm tanlang yoki qamrovi kengroq masshtabdan foydalaning.",
+      save: "Rasmni saqlash",
+      saveFailed: "Rasmni saqlab boʻlmadi. Xarita yoki qatlam eksportni bloklamoqda.",
+      saving: "Saqlanmoqda...",
+      scope: "Qamrov",
+      scaleFallback: "asosiy xarita masshtabi",
+      scaleHints: {
+        100: "koʻchalar va oʻrmon yoʻllari",
+        200: "batafsil sayyohlik xaritasi",
+        300: "marshrut va yaqin atrof",
+        500: "shaharlar va landshaft",
+        1000: "kengroq hudud",
+        2000: "mintaqa",
+        5000: "katta umumiy koʻrinish",
+        10000: "mamlakat va atrofi"
+      },
+      viewDescription: "Xaritaning aynan joriy koʻrinishi saqlanadi.",
+      largeDescription:
+        "{scale} masshtabda {width} x {height} saqlaydi. Yakuniy PNG taxminan {size} x {size} px boʻladi."
+    },
+    markerMenu: {
+      removePoint: "Nuqtani oʻchirish"
+    },
+    routeFile: {
+      emptyFile: "Faylda marshrut nuqtalari yoʻq.",
+      loadFailed: "Marshrut faylini yuklab boʻlmadi.",
+      parseFailed: "GPX faylini oʻqib boʻlmadi."
+    },
+    tileJson: {
+      missingApiKey: ".env ichida VITE_MAPY_API_KEY yoʻq",
+      missingTiles: "TileJSON ichida tiles[] maydoni yoʻq"
+    }
+  },
+  ru: {
+    ...baseTranslations.en,
+    appName: "Планировщик маршрутов",
+    common: {
+      close: "Закрыть",
+      export: "Экспорт",
+      github: "GitHub",
+      loadingMap: "Загрузка карты"
+    },
+    header: {
+      browse: "Просмотр",
+      freeRoute: "Свободный маршрут",
+      language: "Язык",
+      roadRoute: "Маршрут по дорогам"
+    },
+    placeSearch: {
+      label: "Поиск места",
+      loading: "Поиск...",
+      placeholder: "Поиск места..."
+    },
+    routeMenu: {
+      ...baseTranslations.en.routeMenu,
+      actions: "Действия",
+      appearance: "Стиль маршрута",
+      basicColors: "Основные цвета маршрута",
+      clearRoute: "Очистить маршрут",
+      color: "Цвет маршрута:",
+      colors: {
+        blue: "синий",
+        green: "зеленый",
+        orange: "оранжевый",
+        purple: "фиолетовый",
+        red: "красный",
+        yellow: "желтый"
+      },
+      dash: "Пунктир маршрута",
+      display: "Отображение",
+      file: "Файл",
+      hidden: "выключено",
+      hideMarkers: "Скрыть маркеры",
+      loadRoute: "Загрузить маршрут",
+      opacity: "Видимость маршрута",
+      route: "Маршрут",
+      saveRoute: "Сохранить маршрут",
+      width: "Ширина маршрута"
+    },
+    mapMenu: {
+      aerial: "Аэрофото",
+      base: "Базовая карта",
+      basic: "Базовая",
+      color: "Цветная",
+      grayscale: "Черно-белая",
+      layers: "Слои",
+      map: "Карта",
+      mapTone: "Тон карты",
+      outdoor: "Туристическая",
+      saveImage: "Сохранить изображение",
+      touristRoutes: "Туристические маршруты",
+      winter: "Зимняя"
+    },
+    mapView: {
+      missingApiKey: "Отсутствует API-ключ Mapy.com.",
+      mapLoadFailed: "Не удалось загрузить карту:",
+      placeNotFound: "Место не найдено.",
+      routeFailed: "Не удалось пересчитать маршрут.",
+      routeLoading: "Пересчет маршрута",
+      searchFailed: "Поиск не удался.",
+      searchingPlace: "Поиск места..."
+    },
+    routeSummary: {
+      ascent: "Подъем",
+      collapse: "Нажмите, чтобы свернуть",
+      descent: "Спуск",
+      distance: "Расстояние",
+      duration: "Время",
+      elevationUnavailable: "Профиль высот недоступен.",
+      export: "Экспорт",
+      footer: "Сделал Vašek M. для Michal K.",
+      imageProfileSummary:
+        "Расстояние {length} - Время {duration} - Подъем {ascent} - Спуск {descent}",
+      loadingElevations: "Загрузка высот",
+      points: "Точки",
+      profile: "Профиль высот",
+      profilePng: "Профиль PNG",
+      routeOverview: "Обзор маршрута",
+      segments: "Участки между точками",
+      segmentsDoc: "Таблица DOC",
+      segmentsTitle: "Участки маршрута",
+      summaryLine: "Расстояние: {length} - Время: {duration} - Подъем: {ascent} - Спуск: {descent}"
+    },
+    routeModes: {
+      bike: "Велосипед",
+      car: "Авто",
+      foot: "Пешком",
+      route: "Маршрут",
+      types: {
+        bike_mountain: "Горный велосипед",
+        bike_road: "Шоссейный велосипед",
+        car_fast: "Авто быстрый",
+        car_fast_traffic: "Авто быстрый с пробками",
+        car_short: "Авто короткий",
+        foot_fast: "Пешком быстро",
+        foot_hiking: "Пеший туризм"
+      }
+    },
+    exportDialog: {
+      ...baseTranslations.en.exportDialog,
+      centerDefault: "По умолчанию используется текущий центр карты.",
+      centerMoved: "Предпросмотр и экспорт используют смещенный центр.",
+      centerTitle: "Центр большой карты",
+      close: "Закрыть",
+      currentView: "Текущий вид",
+      imageAlt: "Предпросмотр экспорта карты",
+      imageSize: "Размер изображения",
+      largeMap: "Большая карта",
+      mapLoadAlert: "Не удалось сохранить карту, потому что она еще не загружена.",
+      mapScale: "Масштаб карты",
+      moveCenterDown: "Сместить центр вниз",
+      moveCenterLeft: "Сместить центр влево",
+      moveCenterRight: "Сместить центр вправо",
+      moveCenterUp: "Сместить центр вверх",
+      noPreview: "Предпросмотр недоступен",
+      previewLoading: "Создание предпросмотра",
+      resetCenter: "Вернуть текущий центр карты",
+      routePartiallyOutside:
+        "Часть маршрута, вероятно, будет за пределами итогового изображения. Переместите карту ближе к маршруту, выберите большее изображение или масштаб с большим охватом.",
+      routeOutside:
+        "Маршрут, вероятно, не попадет в итоговое изображение. Переместите карту ближе к маршруту, выберите большее изображение или масштаб с большим охватом.",
+      save: "Сохранить изображение",
+      saveFailed: "Не удалось сохранить изображение. Карта или слой блокирует экспорт.",
+      saving: "Сохранение...",
+      scope: "Область",
+      scaleFallback: "масштаб базовой карты",
+      scaleHints: {
+        100: "улицы и лесные дороги",
+        200: "подробная туристическая карта",
+        300: "маршрут с ближайшими окрестностями",
+        500: "города и ландшафт",
+        1000: "более широкая область",
+        2000: "регион",
+        5000: "большой обзор",
+        10000: "страна и окрестности"
+      },
+      viewDescription: "Будет сохранен именно текущий вид карты.",
+      largeDescription:
+        "Сохраняет {width} x {height} в масштабе {scale}. Итоговый PNG будет примерно {size} x {size} px."
+    },
+    markerMenu: {
+      removePoint: "Удалить точку"
+    },
+    routeFile: {
+      emptyFile: "Файл не содержит ни одной точки маршрута.",
+      loadFailed: "Не удалось загрузить файл маршрута.",
+      parseFailed: "Не удалось прочитать GPX-файл."
+    },
+    tileJson: {
+      missingApiKey: "Отсутствует VITE_MAPY_API_KEY в .env",
+      missingTiles: "TileJSON не содержит поле tiles[]"
+    }
+  },
   de: {
     ...baseTranslations.en,
     appName: "Routenplaner",
@@ -945,8 +1931,7 @@ export const translations = {
       segments: "Abschnitte zwischen Punkten",
       segmentsDoc: "Tabelle DOC",
       segmentsTitle: "Routenabschnitte",
-      summaryLine:
-        "Distanz: {length} - Zeit: {duration} - Aufstieg: {ascent} - Abstieg: {descent}"
+      summaryLine: "Distanz: {length} - Zeit: {duration} - Aufstieg: {ascent} - Abstieg: {descent}"
     },
     routeModes: {
       bike: "Fahrrad",
@@ -987,7 +1972,8 @@ export const translations = {
       routeOutside:
         "Die Route wird wahrscheinlich nicht im endgültigen Bild sein. Verschieben Sie die Karte näher zur Route, wählen Sie ein größeres Bild oder einen Maßstab mit größerer Abdeckung.",
       save: "Bild speichern",
-      saveFailed: "Das Bild konnte nicht gespeichert werden. Eine Karte oder Ebene blockiert den Export.",
+      saveFailed:
+        "Das Bild konnte nicht gespeichert werden. Eine Karte oder Ebene blockiert den Export.",
       saving: "Speichern...",
       scope: "Bereich",
       scaleFallback: "Maßstab der Basiskarte",
@@ -1106,8 +2092,7 @@ export const translations = {
       segments: "Segments entre les points",
       segmentsDoc: "Tableau DOC",
       segmentsTitle: "Segments de l'itinéraire",
-      summaryLine:
-        "Distance: {length} - Temps: {duration} - Montée: {ascent} - Descente: {descent}"
+      summaryLine: "Distance: {length} - Temps: {duration} - Montée: {ascent} - Descente: {descent}"
     },
     routeModes: {
       bike: "Vélo",
@@ -1913,7 +2898,8 @@ export const translations = {
       routeOutside:
         "ルートが最終画像に入らない可能性があります。地図をルートに近づけるか、より大きい画像または広い範囲を含む縮尺を選んでください。",
       save: "画像を保存",
-      saveFailed: "画像を保存できませんでした。地図またはレイヤーがエクスポートをブロックしています。",
+      saveFailed:
+        "画像を保存できませんでした。地図またはレイヤーがエクスポートをブロックしています。",
       saving: "保存中...",
       scope: "範囲",
       scaleFallback: "ベースマップの縮尺",

@@ -1,17 +1,11 @@
-import { ChevronDown } from "lucide-react"
-import type { Dispatch } from "react"
+import { Check, ChevronDown, Search } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import type { Dispatch, KeyboardEvent } from "react"
 
 import { PlaceSearch } from "@/components/layout/PlaceSearch"
 import { MapMenu } from "@/components/maps/MapMenu"
 import { RouteMenu } from "@/components/routes/RouteMenu"
-import {
-  Menubar,
-  MenubarContent,
-  MenubarMenu,
-  MenubarRadioGroup,
-  MenubarRadioItem,
-  MenubarTrigger,
-} from "@/components/ui/menubar"
+import { Menubar } from "@/components/ui/menubar"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import type { Language } from "@/lib/i18n"
 import { languageFlagCountries, languageLabels, languages, translations } from "@/lib/i18n"
@@ -61,7 +55,7 @@ const freeToggleItemClass =
 
 const FlagCluster = ({
   countries,
-  className = "",
+  className = ""
 }: {
   countries: readonly string[]
   className?: string
@@ -79,6 +73,169 @@ const FlagCluster = ({
     ))}
   </span>
 )
+
+const normalizeLanguageSearch = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase()
+
+const LanguageSelect = ({
+  label,
+  language,
+  setLanguage
+}: {
+  label: string
+  language: Language
+  setLanguage: Dispatch<Language>
+}) => {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState("")
+  const [activeIndex, setActiveIndex] = useState(0)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const filteredLanguages = useMemo(() => {
+    const normalizedQuery = normalizeLanguageSearch(query)
+
+    if (!normalizedQuery) return languages
+
+    return languages.filter((option) =>
+      normalizeLanguageSearch(`${languageLabels[option]} ${option}`).includes(normalizedQuery)
+    )
+  }, [query])
+
+  useEffect(() => {
+    if (!open) return
+
+    const frame = window.requestAnimationFrame(() => inputRef.current?.focus())
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false)
+        setQuery("")
+      }
+    }
+
+    document.addEventListener("pointerdown", onPointerDown)
+
+    return () => document.removeEventListener("pointerdown", onPointerDown)
+  }, [open])
+
+  useEffect(() => {
+    setActiveIndex(0)
+  }, [open, query])
+
+  const selectLanguage = (nextLanguage: Language) => {
+    setLanguage(nextLanguage)
+    setOpen(false)
+    setQuery("")
+  }
+
+  const handleInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault()
+      setActiveIndex((index) =>
+        filteredLanguages.length ? Math.min(index + 1, filteredLanguages.length - 1) : 0
+      )
+      return
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault()
+      setActiveIndex((index) => Math.max(index - 1, 0))
+      return
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault()
+      const nextLanguage = filteredLanguages[activeIndex]
+      if (nextLanguage) selectLanguage(nextLanguage)
+      return
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault()
+      setOpen(false)
+      setQuery("")
+    }
+  }
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        className="flex h-9 max-w-[12rem] items-center gap-1.5 rounded-lg bg-blue-950/35 px-2.5 text-sm font-semibold text-white shadow-inner outline-offset-2 hover:bg-blue-950/45 focus:outline-2 focus:outline-white data-[state=open]:bg-white data-[state=open]:text-blue-950"
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        aria-label={label}
+        data-state={open ? "open" : "closed"}
+        title={label}
+        onClick={() => setOpen((current) => !current)}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown") {
+            event.preventDefault()
+            setOpen(true)
+          }
+        }}
+      >
+        <FlagCluster countries={languageFlagCountries[language]} />
+        <span className="hidden min-w-0 truncate sm:inline">{languageLabels[language]}</span>
+        <span className="sm:hidden">{language.toUpperCase()}</span>
+        <ChevronDown className="size-3.5 shrink-0 opacity-80" />
+      </button>
+
+      {open ? (
+        <div className="absolute right-0 top-full z-[2100] mt-2 w-80 max-w-[calc(100vw-1.5rem)] rounded-md border bg-popover p-1 text-popover-foreground shadow-lg">
+          <div className="flex h-9 items-center gap-2 rounded-sm border bg-background px-2 text-sm">
+            <Search className="size-4 shrink-0 text-muted-foreground" />
+            <input
+              ref={inputRef}
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={handleInputKeyDown}
+              className="h-full min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+              placeholder={label}
+              type="search"
+            />
+          </div>
+
+          <div className="mt-1 max-h-72 overflow-y-auto" role="listbox" aria-label={label}>
+            {filteredLanguages.map((option, index) => (
+              <button
+                key={option}
+                type="button"
+                role="option"
+                aria-selected={option === language}
+                className={`grid w-full grid-cols-[5.5rem_minmax(0,1fr)_2rem] items-center gap-3 rounded-sm px-2 py-1.5 text-left text-sm outline-none ${
+                  index === activeIndex ? "bg-accent text-accent-foreground" : ""
+                }`}
+                onClick={() => selectLanguage(option)}
+                onMouseEnter={() => setActiveIndex(index)}
+              >
+                <FlagCluster countries={languageFlagCountries[option]} className="w-[5.5rem]" />
+                <span className="min-w-0 truncate">{languageLabels[option]}</span>
+                {option === language ? (
+                  <Check className="size-4 justify-self-end text-blue-600" />
+                ) : (
+                  <span className="justify-self-end text-xs font-semibold text-muted-foreground">
+                    {option.toUpperCase()}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
 
 export const HeaderBar = (props: Props) => {
   const apiKey = import.meta.env.VITE_MAPY_API_KEY as string
@@ -161,45 +318,11 @@ export const HeaderBar = (props: Props) => {
               onSelectPlace={props.onSelectPlace}
             />
 
-            <Menubar className="h-auto border-0 bg-transparent p-0 shadow-none">
-              <MenubarMenu>
-                <MenubarTrigger
-                  className="h-9 gap-1.5 rounded-lg bg-blue-950/35 px-2.5 text-sm font-semibold text-white shadow-inner hover:bg-blue-950/45 focus:bg-blue-950/45 focus:text-white data-[state=open]:bg-white data-[state=open]:text-blue-950"
-                  aria-label={t.header.language}
-                  title={t.header.language}
-                >
-                  <FlagCluster countries={languageFlagCountries[props.language]} />
-                  <span className="hidden max-w-28 truncate sm:inline">
-                    {languageLabels[props.language]}
-                  </span>
-                  <span className="sm:hidden">{props.language.toUpperCase()}</span>
-                  <ChevronDown className="size-3.5 opacity-80" />
-                </MenubarTrigger>
-                <MenubarContent align="end" className="w-72 max-w-[calc(100vw-1.5rem)]">
-                  <MenubarRadioGroup
-                    value={props.language}
-                    onValueChange={(value) => props.setLanguage(value as Language)}
-                  >
-                    {languages.map((language) => (
-                      <MenubarRadioItem
-                        key={language}
-                        value={language}
-                        className="grid grid-cols-[5.5rem_minmax(0,1fr)_2rem] gap-3"
-                      >
-                        <FlagCluster
-                          countries={languageFlagCountries[language]}
-                          className="w-[5.5rem]"
-                        />
-                        <span className="min-w-0 flex-1 truncate">{languageLabels[language]}</span>
-                        <span className="justify-self-end text-xs font-semibold text-muted-foreground">
-                          {language.toUpperCase()}
-                        </span>
-                      </MenubarRadioItem>
-                    ))}
-                  </MenubarRadioGroup>
-                </MenubarContent>
-              </MenubarMenu>
-            </Menubar>
+            <LanguageSelect
+              label={t.header.language}
+              language={props.language}
+              setLanguage={props.setLanguage}
+            />
           </div>
         </div>
       </div>
