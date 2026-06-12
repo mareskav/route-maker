@@ -30,7 +30,7 @@ export const helpGuides = {
         items: [
           "Zvol Trasa po cestách pro automatické vedení po cestní síti.",
           "Zvol Trasa volně pro přímé úseky mezi kliknutými body.",
-          "Klikáním do mapy přidávej body trasy; body můžeš přetáhnout."
+          "Klikáním do mapy přidávej body trasy; body můžeš přetáhnout nebo smazat přes menu bodu pravým kliknutím."
         ]
       },
       {
@@ -71,7 +71,7 @@ export const helpGuides = {
         items: [
           "Choose Route on roads for automatic routing along the road and path network.",
           "Choose Free route for straight segments between clicked points.",
-          "Click the map to add route points; drag points to adjust them."
+          "Click the map to add route points; drag points to adjust them, or right-click a point and choose Delete point."
         ]
       },
       {
@@ -112,7 +112,7 @@ export const helpGuides = {
         items: [
           "Usa Ruta por caminos para calcular la ruta por la red de carreteras y senderos.",
           "Usa Ruta libre para crear tramos rectos entre los puntos.",
-          "Haz clic en el mapa para añadir puntos; arrástralos para ajustar la ruta."
+          "Haz clic en el mapa para añadir puntos; arrástralos para ajustar la ruta o haz clic derecho en un punto para eliminarlo."
         ]
       },
       {
@@ -153,7 +153,7 @@ export const helpGuides = {
         items: [
           "Usa Percorso su strade per seguire automaticamente strade e sentieri.",
           "Usa Percorso libero per segmenti diretti tra i punti cliccati.",
-          "Clicca sulla mappa per aggiungere punti; trascinali per correggerli."
+          "Clicca sulla mappa per aggiungere punti; trascinali per correggerli oppure fai clic destro su un punto per eliminarlo."
         ]
       },
       {
@@ -194,7 +194,7 @@ export const helpGuides = {
         items: [
           "Wähle Route auf Wegen für automatische Führung über Straßen und Wege.",
           "Wähle Freie Route für gerade Abschnitte zwischen geklickten Punkten.",
-          "Klicke in die Karte, um Punkte zu setzen; ziehe Punkte zum Anpassen."
+          "Klicke in die Karte, um Punkte zu setzen; ziehe Punkte zum Anpassen oder lösche sie per Rechtsklick auf den Punkt."
         ]
       },
       {
@@ -235,7 +235,7 @@ export const helpGuides = {
         items: [
           "Utilise Itinéraire par routes pour suivre automatiquement routes et chemins.",
           "Utilise Itinéraire libre pour des segments droits entre les points.",
-          "Clique sur la carte pour ajouter des points; fais-les glisser pour ajuster."
+          "Clique sur la carte pour ajouter des points; fais-les glisser pour ajuster ou fais un clic droit sur un point pour le supprimer."
         ]
       },
       {
@@ -276,7 +276,7 @@ export const helpGuides = {
         items: [
           "Az Útvonal utakon mód automatikusan utakra és ösvényekre illeszt.",
           "A Szabad útvonal egyenes szakaszokat rajzol a pontok között.",
-          "Kattints a térképre pontok hozzáadásához; húzd őket a módosításhoz."
+          "Kattints a térképre pontok hozzáadásához; húzd őket a módosításhoz, vagy jobb kattintással töröld a pontot."
         ]
       },
       {
@@ -317,7 +317,7 @@ export const helpGuides = {
         items: [
           "Valitse Reitti teitä pitkin automaattiseen reititykseen.",
           "Valitse Vapaa reitti suorille osuuksille pisteiden välillä.",
-          "Lisää pisteitä klikkaamalla karttaa; säädä niitä vetämällä."
+          "Lisää pisteitä klikkaamalla karttaa; säädä niitä vetämällä tai poista piste hiiren oikealla painikkeella."
         ]
       },
       {
@@ -358,7 +358,7 @@ export const helpGuides = {
         items: [
           "Wybierz Trasę po drogach, aby prowadzić po sieci dróg i ścieżek.",
           "Wybierz Trasę swobodną dla prostych odcinków między punktami.",
-          "Klikaj mapę, aby dodać punkty; przeciągaj je, aby poprawić przebieg."
+          "Klikaj mapę, aby dodać punkty; przeciągaj je, aby poprawić przebieg, albo kliknij punkt prawym przyciskiem, aby go usunąć."
         ]
       },
       {
@@ -399,7 +399,7 @@ export const helpGuides = {
         items: [
           "Zvoľ Trasa po cestách pre automatické vedenie po cestnej sieti.",
           "Zvoľ Trasa voľne pre priame úseky medzi kliknutými bodmi.",
-          "Klikaním do mapy pridávaj body trasy; body môžeš presúvať."
+          "Klikaním do mapy pridávaj body trasy; body môžeš presúvať alebo vymazať cez menu bodu pravým kliknutím."
         ]
       },
       {
@@ -440,7 +440,7 @@ export const helpGuides = {
         items: [
           "Izaberi Rutu po putevima za automatsko vođenje po cestama i stazama.",
           "Izaberi Slobodnu rutu za prave dionice između kliknutih tačaka.",
-          "Klikom na mapu dodaj tačke; prevuci ih za podešavanje."
+          "Klikom na mapu dodaj tačke; prevuci ih za podešavanje ili desnim klikom na tačku izaberi brisanje."
         ]
       },
       {
@@ -481,7 +481,7 @@ export const helpGuides = {
         items: [
           "Chọn Tuyến theo đường để tự động đi theo mạng đường và lối mòn.",
           "Chọn Tuyến tự do để tạo các đoạn thẳng giữa các điểm.",
-          "Bấm vào bản đồ để thêm điểm; kéo điểm để chỉnh tuyến."
+          "Bấm vào bản đồ để thêm điểm; kéo điểm để chỉnh tuyến hoặc nhấp chuột phải vào điểm để xóa."
         ]
       },
       {
@@ -522,7 +522,7 @@ export const helpGuides = {
         items: [
           "도로 경로를 선택하면 도로와 길 네트워크를 따라 자동 계산됩니다.",
           "자유 경로를 선택하면 클릭한 지점 사이를 직선으로 연결합니다.",
-          "지도를 클릭해 지점을 추가하고, 지점을 끌어 조정합니다."
+          "지도를 클릭해 지점을 추가하고, 지점을 끌어 조정하거나 지점을 마우스 오른쪽 버튼으로 클릭해 삭제합니다."
         ]
       },
       {
@@ -563,7 +563,7 @@ export const helpGuides = {
         items: [
           "道路ルートは道路や道のネットワークに沿って自動計算します。",
           "自由ルートはクリックした地点同士を直線で結びます。",
-          "地図をクリックして地点を追加し、ドラッグして調整できます。"
+          "地図をクリックして地点を追加し、ドラッグして調整するか、地点を右クリックして削除できます。"
         ]
       },
       {
@@ -604,7 +604,7 @@ export const helpGuides = {
         items: [
           "Обери Маршрут дорогами для автоматичного ведення дорогами й стежками.",
           "Обери Вільний маршрут для прямих відрізків між точками.",
-          "Клікай по мапі, щоб додавати точки; перетягуй їх для корекції."
+          "Клікай по мапі, щоб додавати точки; перетягуй їх для корекції або клацни точку правою кнопкою, щоб видалити."
         ]
       },
       {
@@ -645,7 +645,7 @@ export const helpGuides = {
         items: [
           "Жолдар бойынша маршрут жолдар мен соқпақтармен автоматты жүргізеді.",
           "Еркін маршрут басылған нүктелердің арасын түзу сызықпен қосады.",
-          "Нүкте қосу үшін картаны бас; түзету үшін нүктелерді сүйре."
+          "Нүкте қосу үшін картаны бас; түзету үшін нүктелерді сүйре немесе жою үшін нүктені тінтуірдің оң жағымен бас."
         ]
       },
       {
@@ -686,7 +686,7 @@ export const helpGuides = {
         items: [
           "Yoʻllar bo‘yicha marshrut yoʻl va soʻqmoqlar tarmogʻi orqali hisoblaydi.",
           "Erkin marshrut bosilgan nuqtalar orasida toʻgʻri kesmalar yaratadi.",
-          "Nuqta qoʻshish uchun xaritani bosing; sozlash uchun nuqtalarni torting."
+          "Nuqta qoʻshish uchun xaritani bosing; sozlash uchun nuqtalarni torting yoki oʻchirish uchun nuqtani oʻng tugma bilan bosing."
         ]
       },
       {
@@ -727,7 +727,7 @@ export const helpGuides = {
         items: [
           "Маршрут по дорогам автоматически ведет по дорогам и тропам.",
           "Свободный маршрут создает прямые отрезки между выбранными точками.",
-          "Кликай по карте для добавления точек; перетаскивай их для правки."
+          "Кликай по карте для добавления точек; перетаскивай их для правки или щелкни точку правой кнопкой, чтобы удалить."
         ]
       },
       {

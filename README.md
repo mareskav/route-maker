@@ -1,105 +1,104 @@
-# Trasovník (RouteMaker)
+# Trasovník (Route Maker)
 
 <p>
-  <a href="README.md"><img alt="🇨🇿 Čeština" src="https://img.shields.io/badge/%F0%9F%87%A8%F0%9F%87%BF-%C4%8Ce%C5%A1tina-blue"></a>
-  <a href="README_EN.md"><img alt="🇬🇧 English" src="https://img.shields.io/badge/%F0%9F%87%AC%F0%9F%87%A7-English-blue"></a>
+  <a href="README.md"><img alt="🇬🇧 English" src="https://img.shields.io/badge/%F0%9F%87%AC%F0%9F%87%A7-English-blue"></a>
+  <a href="README_CZ.md"><img alt="🇨🇿 Čeština" src="https://img.shields.io/badge/%F0%9F%87%A8%F0%9F%87%BF-%C4%8Ce%C5%A1tina-blue"></a>
 </p>
 
-Trasovník je webová aplikace pro přípravu tras v mapě, měření jejich délky a převýšení a export podkladů pro sdílení nebo tisk. Vznikl pro potřeby projektu [Cestou Vysočiny](https://www.stoky.cz/cestou-vysociny/a-1388) a koordinátorů cestovního ruchu v kraji Vysočina.
+Trasovník is a browser tool for preparing map routes, measuring their length and elevation, and exporting outputs for sharing or print. It was created for the [Cestou Vysočiny](https://www.stoky.cz/cestou-vysociny/a-1388) trail initiative and tourism coordinators in the Vysočina region.
 
-Aplikaci otevřete zde: https://trasovnik.mareska.xyz/
+Open the application here: https://trasovnik.mareska.xyz/
 
-![Náhled](docs/images/preview.png)
+![Preview](docs/images/preview.png)
 
-## K čemu slouží
+## What You Can Do
 
-- Kreslení tras nad mapovými podklady Mapy.com.
-- Kombinace úseků vedených po cestách a volných rovných úseků.
-- Vyhledávání míst a rychlý přesun v mapě.
-- Měření délky, odhadovaného času, stoupání, klesání a hodnot po jednotlivých úsecích.
-- Uložení trasy do souboru GPX.
-- Načtení dříve uložené GPX trasy.
-- Export aktuálního výřezu nebo větší mapy do PNG.
-- Export výškového profilu do PNG a tabulky úseků do DOC.
+- Draw routes on top of Mapy.com map layers.
+- Combine routed sections with free straight-line sections in one route.
+- Search for places and move around the map.
+- Measure route distance, estimated time, ascent, descent, and section-by-section values.
+- Export the route as a GPX file.
+- Load a previously saved GPX route.
+- Export the visible map or a larger map image as PNG.
+- Export an elevation profile as PNG and a route-section table as DOC.
 
-## Základní ovládání
+## Basic Use
 
-1. Otevřete aplikaci v moderním webovém prohlížeči.
-2. Vyhledávacím polem v horní liště najděte obec, místo, adresu nebo turistický cíl.
-3. V horní liště zvolte režim práce s mapou:
-   - **Prohlížet**: mapa se jen posouvá a přibližuje, body trasy se nepřidávají.
-   - **Trasa po cestách**: klikáním přidáváte body a aplikace mezi nimi dopočítá trasu po cestách, stezkách nebo silnicích.
-   - **Trasa volně**: klikáním přidáváte ruční rovné úseky.
-4. Kliknutím do mapy přidejte bod trasy. První bod trasu založí, každý další bod vytvoří nový úsek.
-5. Očíslované body můžete přetahovat myší a trasu tím upravit.
-6. Bod smažete kliknutím na očíslovanou značku, případně pravým kliknutím na značku a volbou **Vymazat bod**.
+1. Open the app in a modern browser.
+2. Use the search field in the top bar to find a town, landmark, address, or other place.
+3. Choose how you want to work with the map:
+   - **Browse**: pan and zoom the map without adding route points.
+   - **Route on roads**: add route points and let the app calculate the route along roads, paths, or trails.
+   - **Free route**: add straight-line route sections manually.
+4. Click in the map to add route points. The first point starts the route; each next point creates a new section.
+5. Drag numbered points to adjust the route.
+6. Click a numbered marker to remove that point. You can also right-click a point and choose **Delete point** from its menu.
 
-## Typ trasy
+## Route Modes
 
-Po přidání alespoň dvou bodů se dole zobrazí panel s přehledem trasy. V něm můžete vybrat profil, podle kterého se dopočítávají úseky po cestách:
+The bottom route panel appears after you add at least two points. It shows the route summary and lets you choose the routing profile:
 
-- **Pěšky turistická** nebo **Pěšky rychlá**.
-- **Kolo silniční** nebo **Kolo horské**.
-- **Auto rychlá s provozem**, **Auto rychlá** nebo **Auto krátká**.
+- **Hiking** or **Walk fast** for walking routes.
+- **Road bike** or **Mountain bike** for cycling routes.
+- **Car fast with traffic**, **Car fast**, or **Car short** for car routes.
 
-Změna profilu trasu přepočítá. Volné úseky zůstávají rovné.
+Changing the profile recalculates routed sections. Free sections remain straight lines.
 
-## Přehled trasy
+## Route Summary
 
-Spodní panel lze sbalit nebo rozbalit.
+The bottom panel can be collapsed or expanded.
 
-Ve sbaleném stavu ukazuje hlavní hodnoty: délku, odhadovaný čas, stoupání a klesání. Po rozbalení navíc obsahuje:
+In the compact view, it shows the main totals: distance, estimated time, ascent, and descent. In the expanded view, it also includes:
 
-- výškový profil,
-- tabulku úseků mezi body,
-- přepínače sloupců pro vzdálenost, čas, stoupání a klesání,
-- export **Profil PNG**,
-- export **Tabulka DOC**.
+- an elevation profile,
+- a table of sections between route points,
+- checkboxes for showing or hiding distance, time, ascent, and descent columns,
+- export buttons for **Profile PNG** and **Table DOC**.
 
-Výškové hodnoty se počítají z geometrie trasy a po změně trasy se mohou chvíli načítat.
+Elevation values are calculated from the route geometry. They may take a moment to load after route changes.
 
-## Vzhled a soubory trasy
+## Route Appearance
 
-V horní nabídce **Trasa** upravíte vzhled trasy:
+Open **Route** in the top menu to adjust how the route looks:
 
-- barvu,
-- šířku,
-- šrafování,
-- průhlednost,
-- zobrazení nebo skrytí očíslovaných značek.
+- route color,
+- route width,
+- dashed style,
+- route opacity,
+- visibility of numbered markers.
 
-Ve stejné nabídce jsou také souborové a pracovní akce:
+The same menu also contains:
 
-- **Načíst trasu**: načte GPX soubor.
-- **Uložit trasu**: stáhne aktuální trasu jako GPX.
-- **Vymazat trasu**: smaže aktuální trasu z mapy.
+- **Load route**: load a GPX file,
+- **Save route**: download the current route as GPX,
+- **Clear route**: clear the current route.
 
-Export GPX obsahuje editační body pro další práci v Trasovníku a zároveň stopu trasy pro použití v jiných mapových nástrojích.
+The GPX export includes the editable route points used by Trasovník and a track line for use in other map tools.
 
-## Nastavení mapy
+## Map Settings
 
-V horní nabídce **Mapa** nastavíte mapový podklad:
+Open **Map** in the top menu to change the map:
 
-- barevný nebo černobílý tón mapy,
-- základní, turistický, letecký nebo zimní podklad,
-- zapnutí nebo vypnutí vrstvy turistických tras,
-- export obrázku přes **Uložit obrázek**.
+- switch between color and black-and-white map tone,
+- choose a base map: basic, tourist, aerial, or winter,
+- show or hide tourist trail overlays,
+- start image export with **Save image**.
 
-## Export obrázku mapy
+## Exporting a Map Image
 
-Přes **Mapa -> Uložit obrázek** uložíte mapu jako PNG.
+Use **Map -> Save image** to save a PNG map image.
 
-Vybrat můžete:
+You can export:
 
-- **Aktuální výřez**: uloží přesně oblast, kterou právě vidíte v aplikaci.
-- **Velká mapa**: uloží větší čtvercovou mapu kolem aktuálního středu.
+- **Current view**: exactly the map area currently visible on screen.
+- **Large map**: a larger square map centered around the current map position.
 
-U velké mapy lze nastavit velikost obrázku, měřítko a případně posunout střed exportu šipkami. Dialog ukazuje náhled a upozorní, když bude část trasy mimo výsledný obrázek.
+For a large map, choose image size, map scale, and optionally nudge the export center with the arrow buttons. The dialog shows a preview and warns if the route is partly or completely outside the exported area.
 
-## Praktické tipy
+## Tips
 
-- Když chcete mapu jen posouvat, přepněte zpět na **Prohlížet**.
-- Při vkládání bodů na husté síti cest si mapu nejdřív přibližte.
-- **Trasa volně** se hodí pro přechody mimo značené cesty, dočasné objížďky nebo místa, kde trasu nechcete vést po mapovaných cestách.
-- Před většími úpravami si trasu uložte do GPX.
-- Černobílý tón mapy se hodí pro čistší tiskové výstupy.
+- Switch back to **Browse** when you only want to move around the map.
+- Zoom in before placing points on dense paths or road junctions.
+- Use **Free route** for field crossings, temporary detours, or sections that should not follow mapped roads.
+- Save a GPX copy before making large changes to a route.
+- Use the black-and-white map tone when preparing cleaner print outputs.

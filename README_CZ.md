@@ -1,8 +1,8 @@
-# Trasovník (RouteMaker)
+# Trasovník (Route Maker)
 
 <p>
-  <a href="README.md"><img alt="🇨🇿 Čeština" src="https://img.shields.io/badge/%F0%9F%87%A8%F0%9F%87%BF-%C4%8Ce%C5%A1tina-blue"></a>
-  <a href="README_EN.md"><img alt="🇬🇧 English" src="https://img.shields.io/badge/%F0%9F%87%AC%F0%9F%87%A7-English-blue"></a>
+  <a href="README.md"><img alt="🇬🇧 English" src="https://img.shields.io/badge/%F0%9F%87%AC%F0%9F%87%A7-English-blue"></a>
+  <a href="README_CZ.md"><img alt="🇨🇿 Čeština" src="https://img.shields.io/badge/%F0%9F%87%A8%F0%9F%87%BF-%C4%8Ce%C5%A1tina-blue"></a>
 </p>
 
 Trasovník je webová aplikace pro přípravu tras v mapě, měření jejich délky a převýšení a export podkladů pro sdílení nebo tisk. Vznikl pro potřeby projektu [Cestou Vysočiny](https://www.stoky.cz/cestou-vysociny/a-1388) a koordinátorů cestovního ruchu v kraji Vysočina.
@@ -31,8 +31,8 @@ Aplikaci otevřete zde: https://trasovnik.mareska.xyz/
    - **Trasa po cestách**: klikáním přidáváte body a aplikace mezi nimi dopočítá trasu po cestách, stezkách nebo silnicích.
    - **Trasa volně**: klikáním přidáváte ruční rovné úseky.
 4. Kliknutím do mapy přidejte bod trasy. První bod trasu založí, každý další bod vytvoří nový úsek.
-5. Očíslované body můžete přetahovat myší a trasu tím upravit.
-6. Bod smažete kliknutím na očíslovanou značku, případně pravým kliknutím na značku a volbou **Vymazat bod**.
+5. Očíslované body můžete přetahovat myší a trasu tím přesněji upravit.
+6. Bod smažete kliknutím na očíslovanou značku. Pravým kliknutím na bod otevřete menu, kde můžete zvolit **Vymazat bod**.
 
 ## Typ trasy
 
