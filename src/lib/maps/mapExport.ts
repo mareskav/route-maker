@@ -33,12 +33,32 @@ export type RouteExportVisibility = "full" | "partial" | "none"
 
 type LargeMapOptions = ExportMapOptions & {
   center?: LatLngLiteral
+  onProgress?: ExportProgressCallback
   renderSize?: number
   scaleMeters: number
   showTouristOverlay: boolean
   size: number
   tileUrl: string
 }
+
+export type ExportProgressPhase =
+  | "preparing"
+  | "tiles"
+  | "overlay"
+  | "tone"
+  | "route"
+  | "markers"
+  | "encoding"
+  | "complete"
+
+export type ExportProgress = {
+  completed: number
+  percent: number
+  phase: ExportProgressPhase
+  total: number
+}
+
+type ExportProgressCallback = (progress: ExportProgress) => void
 
 export const EXPORT_SCALE_OPTIONS: ExportScaleOption[] = [
   { label: "100 m", meters: 100 },
@@ -67,11 +87,47 @@ const createImageFilename = () => {
   return `trasovnik-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}.png`
 }
 
-export const downloadCanvas = (canvas: HTMLCanvasElement) => {
+const reportProgress = (
+  onProgress: ExportProgressCallback | undefined,
+  phase: ExportProgressPhase,
+  completed: number,
+  total: number
+) => {
+  if (!onProgress) return
+
+  const safeTotal = Math.max(1, total)
+  const safeCompleted = Math.min(Math.max(0, completed), safeTotal)
+
+  onProgress({
+    completed: safeCompleted,
+    percent: (safeCompleted / safeTotal) * 100,
+    phase,
+    total: safeTotal
+  })
+}
+
+const yieldToBrowser = () =>
+  new Promise<void>((resolve) => {
+    window.requestAnimationFrame(() => resolve())
+  })
+
+export const downloadCanvas = async (canvas: HTMLCanvasElement) => {
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((result) => {
+      if (result) {
+        resolve(result)
+      } else {
+        reject(new Error("Canvas PNG encoding failed."))
+      }
+    }, "image/png")
+  })
   const link = document.createElement("a")
+  const url = URL.createObjectURL(blob)
+
   link.download = createImageFilename()
-  link.href = canvas.toDataURL("image/png")
+  link.href = url
   link.click()
+  window.setTimeout(() => URL.revokeObjectURL(url), 0)
 }
 
 const safeHexColor = (color: string) => {
@@ -557,7 +613,10 @@ export const routeVisibilityInLargeExport = (
   return routeVisibilityInRect(options, toPoint, options.size, options.size)
 }
 
-export const exportMapCanvas = async (map: L.Map, options: ExportMapOptions) => {
+export const exportMapCanvas = async (
+  map: L.Map,
+  options: ExportMapOptions & { onProgress?: ExportProgressCallback }
+) => {
   const container = map.getContainer()
   const mapBounds = container.getBoundingClientRect()
   const scale = window.devicePixelRatio || 1
@@ -568,37 +627,89 @@ export const exportMapCanvas = async (map: L.Map, options: ExportMapOptions) => 
 
   canvas.width = Math.round(mapBounds.width * scale)
   canvas.height = Math.round(mapBounds.height * scale)
+
+  const tileImages = Array.from(
+    container.querySelectorAll<HTMLImageElement>(".leaflet-tile-pane img.leaflet-tile")
+  )
+  const overlayImages = Array.from(
+    container.querySelectorAll<HTMLImageElement>(".leaflet-pane:not(.leaflet-tile-pane) img.leaflet-tile")
+  )
+  const paneCanvases = Array.from(container.querySelectorAll<HTMLCanvasElement>(".leaflet-pane canvas"))
+  const needsTone = options.mapTone === "grayscale"
+  const drawsMarkers = options.showRouteMarkers && options.routePoints.length > 0
+  const total =
+    1 +
+    tileImages.length +
+    overlayImages.length +
+    paneCanvases.length +
+    (needsTone ? 1 : 0) +
+    1 +
+    (drawsMarkers ? 1 : 0)
+  let completed = 0
+
+  reportProgress(options.onProgress, "preparing", completed, total)
+  await yieldToBrowser()
+
   context.fillStyle = "#ffffff"
   context.fillRect(0, 0, canvas.width, canvas.height)
+  completed += 1
+  reportProgress(options.onProgress, "tiles", completed, total)
 
-  container
-    .querySelectorAll<HTMLImageElement>(".leaflet-tile-pane img.leaflet-tile")
-    .forEach((image) => drawImageElement(context, image, mapBounds, scale))
+  for (const image of tileImages) {
+    drawImageElement(context, image, mapBounds, scale)
+    completed += 1
+    reportProgress(options.onProgress, "tiles", completed, total)
+  }
 
-  container
-    .querySelectorAll<HTMLImageElement>(".leaflet-pane:not(.leaflet-tile-pane) img.leaflet-tile")
-    .forEach((image) => drawImageElement(context, image, mapBounds, scale))
+  for (const image of overlayImages) {
+    drawImageElement(context, image, mapBounds, scale)
+    completed += 1
+    reportProgress(options.onProgress, "overlay", completed, total)
+  }
 
-  container
-    .querySelectorAll<HTMLCanvasElement>(".leaflet-pane canvas")
-    .forEach((source) => drawCanvasElement(context, source, mapBounds, scale))
+  for (const source of paneCanvases) {
+    drawCanvasElement(context, source, mapBounds, scale)
+    completed += 1
+    reportProgress(options.onProgress, "overlay", completed, total)
+  }
 
-  if (options.mapTone === "grayscale") applyMapTone(context, canvas.width, canvas.height)
+  if (needsTone) {
+    reportProgress(options.onProgress, "tone", completed, total)
+    await yieldToBrowser()
+    applyMapTone(context, canvas.width, canvas.height)
+    completed += 1
+    reportProgress(options.onProgress, "tone", completed, total)
+  }
 
   drawRoutes(context, map, { ...options, scale })
+  completed += 1
+  reportProgress(options.onProgress, "route", completed, total)
 
-  if (options.showRouteMarkers) {
+  if (drawsMarkers) {
     drawRouteMarkers(context, map, options.routePoints, options.routeColor, scale)
+    completed += 1
+    reportProgress(options.onProgress, "markers", completed, total)
   }
+
+  reportProgress(options.onProgress, "complete", total, total)
 
   return canvas
 }
 
 export const exportLargeMapCanvas = async (map: L.Map, options: LargeMapOptions) => {
-  const zoom = zoomForScale(map, options.scaleMeters)
+  const exportZoom = zoomForScale(map, options.scaleMeters)
   const tileSize = 256
   const renderSize = options.renderSize ?? options.size
-  const scale = renderSize / options.size
+  const outputScale = renderSize / options.size
+  const minZoom = Number.isFinite(map.getMinZoom()) ? map.getMinZoom() : 0
+  const previewZoomReduction =
+    options.renderSize && options.renderSize < options.size
+      ? Math.max(0, Math.round(Math.log2(options.size / options.renderSize)))
+      : 0
+  const tileZoom = Math.max(minZoom, exportZoom - previewZoomReduction)
+  const zoomScale = 2 ** (exportZoom - tileZoom)
+  const sourceSize = options.size / zoomScale
+  const tileScale = renderSize / sourceSize
   const canvas = document.createElement("canvas")
   const context = canvas.getContext("2d")
 
@@ -609,64 +720,96 @@ export const exportLargeMapCanvas = async (map: L.Map, options: LargeMapOptions)
   context.fillStyle = "#ffffff"
   context.fillRect(0, 0, canvas.width, canvas.height)
 
-  const centerPoint = map.project(options.center ?? map.getCenter(), zoom)
-  const topLeft = centerPoint.subtract([options.size / 2, options.size / 2])
+  const centerPoint = map.project(options.center ?? map.getCenter(), tileZoom)
+  const topLeft = centerPoint.subtract([sourceSize / 2, sourceSize / 2])
   const minTileX = Math.floor(topLeft.x / tileSize)
   const minTileY = Math.floor(topLeft.y / tileSize)
-  const maxTileX = Math.floor((topLeft.x + options.size) / tileSize)
-  const maxTileY = Math.floor((topLeft.y + options.size) / tileSize)
-  const tileCount = 2 ** zoom
+  const maxTileX = Math.floor((topLeft.x + sourceSize) / tileSize)
+  const maxTileY = Math.floor((topLeft.y + sourceSize) / tileSize)
+  const tileCount = 2 ** tileZoom
+  const tileCoordinates: { tileX: number; tileY: number; wrappedTileX: number }[] = []
 
   for (let tileY = minTileY; tileY <= maxTileY; tileY++) {
     if (tileY < 0 || tileY >= tileCount) continue
 
     for (let tileX = minTileX; tileX <= maxTileX; tileX++) {
       const wrappedTileX = ((tileX % tileCount) + tileCount) % tileCount
-      const image = await loadTileImage(tileUrlForPoint(options.tileUrl, wrappedTileX, tileY, zoom))
+      tileCoordinates.push({ tileX, tileY, wrappedTileX })
+    }
+  }
 
-      if (!image) continue
+  const needsTone = options.mapTone === "grayscale"
+  const drawsMarkers = options.showRouteMarkers && options.routePoints.length > 0
+  const total =
+    tileCoordinates.length +
+    (options.showTouristOverlay ? tileCoordinates.length : 0) +
+    (needsTone ? 1 : 0) +
+    1 +
+    (drawsMarkers ? 1 : 0)
+  let completed = 0
 
+  reportProgress(options.onProgress, "preparing", completed, total)
+  await yieldToBrowser()
+
+  for (const { tileX, tileY, wrappedTileX } of tileCoordinates) {
+    const image = await loadTileImage(tileUrlForPoint(options.tileUrl, wrappedTileX, tileY, tileZoom))
+
+    if (image) {
       context.drawImage(
         image,
-        Math.round((tileX * tileSize - topLeft.x) * scale),
-        Math.round((tileY * tileSize - topLeft.y) * scale),
-        tileSize * scale,
-        tileSize * scale
+        Math.round((tileX * tileSize - topLeft.x) * tileScale),
+        Math.round((tileY * tileSize - topLeft.y) * tileScale),
+        tileSize * tileScale,
+        tileSize * tileScale
       )
     }
+
+    completed += 1
+    reportProgress(options.onProgress, "tiles", completed, total)
   }
 
   if (options.showTouristOverlay) {
-    for (let tileY = minTileY; tileY <= maxTileY; tileY++) {
-      if (tileY < 0 || tileY >= tileCount) continue
+    for (const { tileX, tileY, wrappedTileX } of tileCoordinates) {
+      const image = await loadTileImage(`/api/touristOverlay/${tileZoom}/${wrappedTileX}/${tileY}`)
 
-      for (let tileX = minTileX; tileX <= maxTileX; tileX++) {
-        const wrappedTileX = ((tileX % tileCount) + tileCount) % tileCount
-        const image = await loadTileImage(
-          `/api/touristOverlay/${zoom}/${wrappedTileX}/${tileY}`
-        )
-
-        if (!image) continue
-
+      if (image) {
         context.drawImage(
           image,
-          Math.round((tileX * tileSize - topLeft.x) * scale),
-          Math.round((tileY * tileSize - topLeft.y) * scale),
-          tileSize * scale,
-          tileSize * scale
+          Math.round((tileX * tileSize - topLeft.x) * tileScale),
+          Math.round((tileY * tileSize - topLeft.y) * tileScale),
+          tileSize * tileScale,
+          tileSize * tileScale
         )
       }
+
+      completed += 1
+      reportProgress(options.onProgress, "overlay", completed, total)
     }
   }
 
-  if (options.mapTone === "grayscale") applyMapTone(context, canvas.width, canvas.height)
-
-  const toPoint = (point: LatLngLiteral) => map.project(point, zoom).subtract(topLeft)
-
-  drawRoutesAtPoint(context, { ...options, scale, toPoint })
-  if (options.showRouteMarkers) {
-    drawRouteMarkersAtPoint(context, options.routePoints, options.routeColor, scale, toPoint)
+  if (needsTone) {
+    reportProgress(options.onProgress, "tone", completed, total)
+    await yieldToBrowser()
+    applyMapTone(context, canvas.width, canvas.height)
+    completed += 1
+    reportProgress(options.onProgress, "tone", completed, total)
   }
+
+  const toPointScale = tileScale / outputScale
+  const toPoint = (point: LatLngLiteral) =>
+    map.project(point, tileZoom).subtract(topLeft).multiplyBy(toPointScale)
+
+  drawRoutesAtPoint(context, { ...options, scale: outputScale, toPoint })
+  completed += 1
+  reportProgress(options.onProgress, "route", completed, total)
+
+  if (drawsMarkers) {
+    drawRouteMarkersAtPoint(context, options.routePoints, options.routeColor, outputScale, toPoint)
+    completed += 1
+    reportProgress(options.onProgress, "markers", completed, total)
+  }
+
+  reportProgress(options.onProgress, "complete", total, total)
 
   return canvas
 }

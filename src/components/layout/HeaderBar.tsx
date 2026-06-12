@@ -285,7 +285,7 @@ export const HeaderBar = (props: Props) => {
   return (
     <header className="sticky top-0 z-[2500] w-full bg-blue-600 text-white shadow-[0_1px_7px_rgba(0,0,0,0.7)]">
       <div className="mx-auto max-w-screen-2xl px-3 py-2 sm:px-4">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="flex flex-wrap items-center justify-start gap-x-3 gap-y-2">
           <button
             type="button"
             className="shrink-0 rounded-sm text-base font-semibold tracking-tight outline-offset-4 hover:text-blue-100 focus:outline-2 focus:outline-white sm:text-lg"
@@ -294,7 +294,7 @@ export const HeaderBar = (props: Props) => {
             {t.appName}
           </button>
 
-          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap sm:gap-5">
+          <div className="flex w-full min-w-0 flex-wrap items-center justify-start gap-2 sm:w-auto sm:flex-nowrap sm:gap-5">
             <ToggleGroup
               type="single"
               value={props.routeClickMode}
@@ -302,7 +302,7 @@ export const HeaderBar = (props: Props) => {
                 if (value) props.setRouteClickMode(value as RouteClickMode)
               }}
               spacing={1}
-              className="rounded-xl bg-blue-950/35 p-1 shadow-inner"
+              className="max-w-full overflow-x-auto rounded-xl bg-blue-950/35 p-1 shadow-inner"
             >
               <ToggleGroupItem value="none" size="sm" className={browseToggleItemClass}>
                 {t.header.browse}
@@ -351,7 +351,7 @@ export const HeaderBar = (props: Props) => {
             </Menubar>
           </div>
 
-          <div className="ml-auto flex shrink-0 items-center gap-3 sm:gap-6">
+          <div className="flex w-full min-w-0 shrink-0 items-center justify-start gap-2 sm:ml-auto sm:w-auto sm:gap-6">
             <PlaceSearch
               apiKey={apiKey}
               language={props.language}

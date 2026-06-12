@@ -24,6 +24,7 @@ import {
   EXPORT_SIZE_OPTIONS,
   exportLargeMapCanvas,
   exportMapCanvas,
+  type ExportProgress,
   routeVisibilityInLargeExport,
   routeVisibilityInViewExport,
   type ExportMode,
@@ -53,6 +54,31 @@ type Props = {
 const PREVIEW_SIZE = 900
 const CENTER_NUDGE_PIXELS = 160
 
+const initialExportProgress = (): ExportProgress => ({
+  completed: 0,
+  percent: 0,
+  phase: "preparing",
+  total: 1
+})
+
+const encodingProgress = (): ExportProgress => ({
+  completed: 0,
+  percent: 99,
+  phase: "encoding",
+  total: 1
+})
+
+const canvasToPngObjectUrl = (canvas: HTMLCanvasElement) =>
+  new Promise<string>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) {
+        resolve(URL.createObjectURL(blob))
+      } else {
+        reject(new Error("Canvas PNG encoding failed."))
+      }
+    }, "image/png")
+  })
+
 const formatMapDistance = (meters: number) => {
   if (meters < 1000) return `${meters} m`
 
@@ -61,7 +87,49 @@ const formatMapDistance = (meters: number) => {
   return Number.isInteger(kilometers) ? `${kilometers} km` : `${kilometers.toFixed(1)} km`
 }
 
-const MapPreviewSkeleton = ({ language }: { language: Language }) => {
+const ExportProgressBar = ({
+  label,
+  progress
+}: {
+  label: string
+  progress: ExportProgress | null
+}) => {
+  const percent = Math.max(0, Math.min(100, Math.round(progress?.percent ?? 0)))
+  const detail =
+    progress && progress.total > 1 ? `${progress.completed}/${progress.total}` : null
+
+  return (
+    <div className="w-full min-w-0">
+      <div className="mb-1 flex items-center justify-between gap-3 text-xs font-medium text-slate-700">
+        <span className="truncate">{label}</span>
+        <span className="shrink-0 tabular-nums text-slate-500">
+          {percent}%{detail ? ` · ${detail}` : ""}
+        </span>
+      </div>
+      <div
+        className="h-2 overflow-hidden rounded-full bg-slate-200"
+        role="progressbar"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={percent}
+      >
+        <div
+          className="h-full rounded-full bg-blue-600 transition-[width] duration-200 ease-out"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+    </div>
+  )
+}
+
+const MapPreviewSkeleton = ({
+  language,
+  progress
+}: {
+  language: Language
+  progress: ExportProgress | null
+}) => {
   const t = translations[language].exportDialog
 
   return (
@@ -102,9 +170,12 @@ const MapPreviewSkeleton = ({ language }: { language: Language }) => {
           strokeWidth="5"
         />
       </svg>
-      <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-md bg-white/95 px-3 py-2 text-sm font-medium text-slate-600 shadow-sm ring-1 ring-black/5">
-        <LoadingSpinner className="text-blue-700" />
-        {t.previewLoading}
+      <div className="absolute left-1/2 top-1/2 w-[min(82%,22rem)] -translate-x-1/2 -translate-y-1/2 rounded-md bg-white/95 px-4 py-3 shadow-sm ring-1 ring-black/5">
+        <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-600">
+          <LoadingSpinner className="text-blue-700" />
+          {t.previewLoading}
+        </div>
+        <ExportProgressBar label={t.previewLoading} progress={progress} />
       </div>
     </div>
   )
@@ -133,8 +204,10 @@ export const MapImageExportDialog = ({
   const [centerSize, setCenterSize] = useState(3000)
   const [centerOffset, setCenterOffset] = useState({ x: 0, y: 0 })
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewProgress, setPreviewProgress] = useState<ExportProgress | null>(null)
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [saveProgress, setSaveProgress] = useState<ExportProgress | null>(null)
 
   const exportOptions = useMemo(
     () => ({
@@ -201,6 +274,7 @@ export const MapImageExportDialog = ({
   useEffect(() => {
     if (!open) {
       setPreviewUrl(null)
+      setPreviewProgress(null)
       return
     }
 
@@ -208,12 +282,18 @@ export const MapImageExportDialog = ({
     if (!map) return
     let cancelled = false
     setIsGeneratingPreview(true)
+    setPreviewProgress(initialExportProgress())
 
     ;(async () => {
       try {
         const canvas =
           mode === "view"
-            ? await exportMapCanvas(map, exportOptions)
+            ? await exportMapCanvas(map, {
+                ...exportOptions,
+                onProgress: (progress) => {
+                  if (!cancelled) setPreviewProgress(progress)
+                }
+              })
             : await exportLargeMapCanvas(map, {
                 ...exportOptions,
                 renderSize: PREVIEW_SIZE,
@@ -221,17 +301,31 @@ export const MapImageExportDialog = ({
                 showTouristOverlay,
                 size: largeSize,
                 center: exportCenter,
-                tileUrl
+                tileUrl,
+                onProgress: (progress) => {
+                  if (!cancelled) setPreviewProgress(progress)
+                }
               })
 
         if (cancelled) return
 
-        setPreviewUrl(canvas.toDataURL("image/png"))
+        setPreviewProgress(encodingProgress())
+        const objectUrl = await canvasToPngObjectUrl(canvas)
+
+        if (cancelled) {
+          URL.revokeObjectURL(objectUrl)
+          return
+        }
+
+        setPreviewUrl(objectUrl)
       } catch (error) {
         console.error("Map image preview failed:", error)
         if (!cancelled) setPreviewUrl(null)
       } finally {
-        if (!cancelled) setIsGeneratingPreview(false)
+        if (!cancelled) {
+          setPreviewProgress(null)
+          setIsGeneratingPreview(false)
+        }
       }
     })()
 
@@ -250,6 +344,12 @@ export const MapImageExportDialog = ({
     tileUrl
   ])
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
+
   if (!open) return null
 
   const handleSave = async () => {
@@ -259,24 +359,31 @@ export const MapImageExportDialog = ({
       return
     }
     setIsSaving(true)
+    setSaveProgress(initialExportProgress())
     try {
       const canvas =
         mode === "view"
-          ? await exportMapCanvas(map, exportOptions)
+          ? await exportMapCanvas(map, {
+              ...exportOptions,
+              onProgress: setSaveProgress
+            })
           : await exportLargeMapCanvas(map, {
               ...exportOptions,
               center: exportCenter,
               scaleMeters,
               showTouristOverlay,
               size: largeSize,
-              tileUrl
+              tileUrl,
+              onProgress: setSaveProgress
             })
 
-      downloadCanvas(canvas)
+      setSaveProgress(encodingProgress())
+      await downloadCanvas(canvas)
     } catch (error) {
       console.error("Map image export failed:", error)
       window.alert(t.saveFailed)
     } finally {
+      setSaveProgress(null)
       setIsSaving(false)
     }
   }
@@ -464,7 +571,7 @@ export const MapImageExportDialog = ({
             <div className="min-h-0 flex-1 p-3 sm:p-4">
               <div className="grid h-full min-h-[220px] place-items-center overflow-hidden rounded-md border border-slate-300 bg-white md:min-h-0">
                 {isGeneratingPreview ? (
-                  <MapPreviewSkeleton language={language} />
+                  <MapPreviewSkeleton language={language} progress={previewProgress} />
                 ) : previewUrl ? (
                   <img
                     src={previewUrl}
@@ -477,14 +584,21 @@ export const MapImageExportDialog = ({
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200 bg-white px-5 py-4">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                {t.close}
-              </Button>
-              <Button type="button" onClick={handleSave} disabled={isSaving}>
-                {isSaving ? <LoadingSpinner /> : <Download className="size-4" />}
-                {isSaving ? t.saving : t.save}
-              </Button>
+            <div className="flex shrink-0 flex-col gap-3 border-t border-slate-200 bg-white px-5 py-4 sm:flex-row sm:items-center">
+              {isSaving && (
+                <div className="w-full sm:mr-auto sm:max-w-sm">
+                  <ExportProgressBar label={t.saving} progress={saveProgress} />
+                </div>
+              )}
+              <div className="flex justify-end gap-3">
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  {t.close}
+                </Button>
+                <Button type="button" onClick={handleSave} disabled={isSaving}>
+                  {isSaving ? <LoadingSpinner /> : <Download className="size-4" />}
+                  {isSaving ? t.saving : t.save}
+                </Button>
+              </div>
             </div>
           </div>
         </div>

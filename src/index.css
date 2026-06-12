@@ -172,50 +172,102 @@
   cursor: crosshair;
 }
 
-.leaflet-control-scale {
-  margin-bottom: 18px !important;
-  margin-left: 14px !important;
-}
-
 .route-panel-collapsed .leaflet-bottom {
+  --map-control-bottom-gap: 6px;
   bottom: calc(96px + env(safe-area-inset-bottom)) !important;
 }
 
 .route-panel-expanded .leaflet-bottom {
+  --map-control-bottom-gap: 8px;
   bottom: 276px !important;
 }
 
 @media (min-width: 640px) {
   .route-panel-collapsed .leaflet-bottom {
+    --map-control-bottom-gap: 8px;
     bottom: 64px !important;
   }
 }
 
+.leaflet-bottom .leaflet-control {
+  margin-bottom: var(--map-control-bottom-gap, 8px) !important;
+}
+
+.leaflet-bottom.leaflet-left .leaflet-control {
+  margin-left: 14px !important;
+}
+
+.leaflet-bottom.leaflet-right .leaflet-control {
+  margin-right: 14px !important;
+}
+
+.leaflet-control-scale,
+.leaflet-control-attribution {
+  overflow: hidden;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 88%) !important;
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 18%),
+    0 0 0 1px rgb(15 23 42 / 12%);
+  backdrop-filter: blur(2px);
+}
+
+.leaflet-control-scale {
+  padding: 6px 8px 7px;
+}
+
 .leaflet-control-scale-line {
   position: relative;
-  height: 12px;
+  height: 16px;
   overflow: visible;
+  margin: 0;
   border: 0;
-  border-bottom: 4px solid #111827;
+  border-bottom: 3px solid #111827;
   border-left: 2px solid #111827;
   border-right: 2px solid #111827;
   background: transparent;
   color: #111827;
-  padding: 0 0 5px;
+  padding: 0 2px 4px;
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
   text-align: right;
-  text-shadow:
-    -1px -1px 0 white,
-    1px -1px 0 white,
-    -1px 1px 0 white,
-    1px 1px 0 white;
+  text-shadow: none;
   box-shadow: none;
 }
 
 .leaflet-control-scale-line:not(:first-child) {
   display: none;
+}
+
+.leaflet-control-attribution {
+  display: flex;
+  min-height: 31px;
+  max-width: calc(100vw - 28px);
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px !important;
+  color: #1f2937;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+.leaflet-control-attribution a {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.leaflet-control-attribution a:hover {
+  text-decoration: underline;
+}
+
+.leaflet-control-attribution img {
+  display: inline-block;
+  max-height: 14px;
+  vertical-align: middle;
 }
 
 .route-point-marker {

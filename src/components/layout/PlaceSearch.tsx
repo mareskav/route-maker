@@ -92,14 +92,14 @@ export const PlaceSearch = ({ apiKey, language, onSearchPlace, onSelectPlace }: 
   }
 
   return (
-    <form className="relative shrink-0" onSubmit={handleSearch}>
+    <form className="relative min-w-0 flex-1 sm:flex-none sm:shrink-0" onSubmit={handleSearch}>
       <label className="sr-only" htmlFor="place-search">
         {t.label}
       </label>
       <div className="relative">
         <input
           id="place-search"
-          className="h-9 w-40 rounded-md border border-white/25 bg-white py-1 pl-3 pr-9 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-500 focus:border-white focus:ring-2 focus:ring-white/45 sm:w-52 lg:w-72"
+          className="h-9 w-full min-w-0 rounded-md border border-white/25 bg-white py-1 pl-3 pr-9 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-500 focus:border-white focus:ring-2 focus:ring-white/45 sm:w-52 lg:w-72"
           type="search"
           value={query}
           placeholder={t.placeholder}
@@ -120,7 +120,7 @@ export const PlaceSearch = ({ apiKey, language, onSearchPlace, onSelectPlace }: 
       </div>
 
       {showSuggestions && (suggestions.length > 0 || isSuggesting) && (
-        <div className="absolute right-0 top-full z-[1010] mt-1 w-80 overflow-hidden rounded-md bg-white text-slate-900 shadow-xl ring-1 ring-black/10">
+        <div className="absolute left-0 top-full z-[1010] mt-1 w-80 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-md bg-white text-slate-900 shadow-xl ring-1 ring-black/10 sm:left-auto sm:right-0">
           {isSuggesting && suggestions.length === 0 && (
             <div className="flex items-center gap-2 px-3 py-2 text-sm text-slate-500">
               <LoadingSpinner className="text-blue-700" />
