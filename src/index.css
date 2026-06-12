@@ -173,11 +173,17 @@
 }
 
 .route-panel-collapsed .leaflet-bottom {
-  bottom: 64px !important;
+  bottom: calc(96px + env(safe-area-inset-bottom)) !important;
 }
 
 .route-panel-expanded .leaflet-bottom {
   bottom: 276px !important;
+}
+
+@media (min-width: 640px) {
+  .route-panel-collapsed .leaflet-bottom {
+    bottom: 64px !important;
+  }
 }
 
 .leaflet-control-scale-line {

@@ -326,11 +326,11 @@ export const RouteSummaryPanel = ({
 
   if (isCollapsed) {
     return (
-      <aside className="absolute inset-x-0 bottom-0 z-[460] border-t border-blue-500 bg-blue-600 text-white shadow-[0_-2px_9px_rgba(15,23,42,0.3)]">
-        <div className="mx-auto grid min-h-11 max-w-screen-2xl grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1 px-3 py-1.5 sm:px-4">
+      <aside className="absolute inset-x-0 bottom-0 z-460 border-t border-blue-500 bg-blue-600 pb-[env(safe-area-inset-bottom)] text-white shadow-[0_-2px_9px_rgba(15,23,42,0.3)]">
+        <div className="mx-auto grid max-w-screen-2xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1.5 px-3 py-2 sm:min-h-11 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-x-3 sm:gap-y-1 sm:px-4 sm:py-1.5">
           <button
             type="button"
-            className="flex min-w-0 justify-self-start items-center gap-2 text-left text-sm font-semibold text-white hover:text-blue-100"
+            className="flex min-w-0 items-center gap-2 justify-self-start text-left text-sm font-semibold text-white hover:text-blue-100"
             onClick={() => setIsCollapsed(false)}
             aria-expanded="false"
           >
@@ -341,7 +341,7 @@ export const RouteSummaryPanel = ({
 
           <div className="justify-self-center">{routeModeControls}</div>
 
-          <span className="flex shrink-0 items-center gap-3 justify-self-end text-sm font-semibold text-blue-50 sm:gap-5">
+          <span className="col-span-2 grid min-w-0 grid-cols-4 items-center gap-1 rounded-lg bg-blue-950/20 px-2 py-1.5 text-xs font-semibold text-blue-50 sm:col-auto sm:flex sm:shrink-0 sm:justify-self-end sm:gap-5 sm:bg-transparent sm:p-0 sm:text-sm">
             <RouteMetrics
               ascentLabel={ascentLabel}
               compact
@@ -357,7 +357,7 @@ export const RouteSummaryPanel = ({
   }
 
   return (
-    <aside className="absolute inset-x-0 bottom-0 z-[460] border-t border-blue-500 bg-blue-600 text-white shadow-[0_-2px_12px_rgba(15,23,42,0.35)]">
+    <aside className="absolute inset-x-0 bottom-0 z-460 border-t border-blue-500 bg-blue-600 text-white shadow-[0_-2px_12px_rgba(15,23,42,0.35)]">
       <div className="mx-auto max-w-screen-2xl px-3 py-3 sm:px-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <button

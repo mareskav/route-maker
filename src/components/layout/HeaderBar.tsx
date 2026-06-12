@@ -53,6 +53,11 @@ const roadToggleItemClass =
 const freeToggleItemClass =
   "rounded-lg px-3 text-white hover:bg-white/10 hover:text-white data-[state=on]:bg-orange-300 data-[state=on]:text-blue-950 data-[state=on]:shadow-sm"
 
+const countryToFlagEmoji = (country: string) =>
+  country
+    .toUpperCase()
+    .replace(/./g, (letter) => String.fromCodePoint(127397 + letter.charCodeAt(0)))
+
 const FlagCluster = ({
   countries,
   className = ""
@@ -60,17 +65,44 @@ const FlagCluster = ({
   countries: readonly string[]
   className?: string
 }) => (
-  <span className={`flex shrink-0 items-center ${className}`} aria-hidden="true">
+  <span className={`flex shrink-0 items-center overflow-visible ${className}`} aria-hidden="true">
     {countries.map((country) => (
-      <img
+      <span
         key={country}
-        className="-ml-2 h-4 w-6 rounded-[2px] object-cover shadow-[0_0_0_1px_rgba(15,23,42,0.18)] first:ml-0"
-        src={`https://flagcdn.com/w40/${country}.png`}
-        srcSet={`https://flagcdn.com/w80/${country}.png 2x`}
-        alt=""
-        loading="lazy"
-      />
+        className="relative -ml-2 flex h-4 w-6 shrink-0 items-center justify-center overflow-hidden rounded-[2px] bg-slate-100 text-[9px] font-bold uppercase leading-none text-slate-500 shadow-[0_0_0_1px_rgba(15,23,42,0.18)] first:ml-0"
+      >
+        <span>{countryToFlagEmoji(country)}</span>
+        <img
+          className="absolute inset-0 h-full w-full object-cover"
+          src={`https://flagcdn.com/w40/${country}.png`}
+          srcSet={`https://flagcdn.com/w80/${country}.png 2x`}
+          alt=""
+          loading="eager"
+          onError={(event) => {
+            event.currentTarget.style.display = "none"
+          }}
+        />
+      </span>
     ))}
+  </span>
+)
+
+const LanguageOptionFlag = ({ country }: { country: string }) => (
+  <span
+    className="relative flex h-4 w-6 shrink-0 items-center justify-center overflow-hidden rounded-[2px] bg-slate-100 text-[8px] font-bold uppercase leading-none text-slate-500 shadow-[0_0_0_1px_rgba(15,23,42,0.18)]"
+    aria-hidden="true"
+  >
+    {country.toUpperCase()}
+    <img
+      className="absolute inset-0 h-full w-full object-cover"
+      src={`https://flagcdn.com/w40/${country}.png`}
+      srcSet={`https://flagcdn.com/w80/${country}.png 2x`}
+      alt=""
+      loading="eager"
+      onError={(event) => {
+        event.currentTarget.style.display = "none"
+      }}
+    />
   </span>
 )
 
@@ -192,7 +224,7 @@ const LanguageSelect = ({
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-full z-[2100] mt-2 w-80 max-w-[calc(100vw-1.5rem)] rounded-md border bg-popover p-1 text-popover-foreground shadow-lg">
+        <div className="absolute right-0 top-full z-[3100] mt-2 w-64 max-w-[calc(100vw-1rem)] rounded-md border bg-popover p-1 text-popover-foreground shadow-lg">
           <div className="flex h-9 items-center gap-2 rounded-sm border bg-background px-2 text-sm">
             <Search className="size-4 shrink-0 text-muted-foreground" />
             <input
@@ -213,13 +245,13 @@ const LanguageSelect = ({
                 type="button"
                 role="option"
                 aria-selected={option === language}
-                className={`grid w-full grid-cols-[5.5rem_minmax(0,1fr)_2rem] items-center gap-3 rounded-sm px-2 py-1.5 text-left text-sm outline-none ${
+                className={`grid w-full grid-cols-[2rem_minmax(0,1fr)_2rem] items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none ${
                   index === activeIndex ? "bg-accent text-accent-foreground" : ""
                 }`}
                 onClick={() => selectLanguage(option)}
                 onMouseEnter={() => setActiveIndex(index)}
               >
-                <FlagCluster countries={languageFlagCountries[option]} className="w-[5.5rem]" />
+                <LanguageOptionFlag country={languageFlagCountries[option][0]} />
                 <span className="min-w-0 truncate">{languageLabels[option]}</span>
                 {option === language ? (
                   <Check className="size-4 justify-self-end text-blue-600" />
@@ -242,7 +274,7 @@ export const HeaderBar = (props: Props) => {
   const t = translations[props.language]
 
   return (
-    <header className="sticky top-0 z-[1000] w-full bg-blue-600 text-white shadow-[0_1px_7px_rgba(0,0,0,0.7)]">
+    <header className="sticky top-0 z-[2500] w-full bg-blue-600 text-white shadow-[0_1px_7px_rgba(0,0,0,0.7)]">
       <div className="mx-auto max-w-screen-2xl px-3 py-2 sm:px-4">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <button

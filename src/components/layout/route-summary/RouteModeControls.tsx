@@ -73,7 +73,7 @@ export const RouteModeControls = ({
       <div className="relative ml-1 min-w-0">
         <button
           type="button"
-          className="flex h-7 min-w-36 max-w-52 items-center justify-between gap-2 rounded-md bg-white px-2.5 text-sm font-medium text-blue-950 shadow-sm ring-1 ring-white/30 hover:bg-blue-50"
+          className="flex h-7 w-36 min-w-0 items-center justify-between gap-2 rounded-md bg-white px-2.5 text-sm font-medium text-blue-950 shadow-sm ring-1 ring-white/30 hover:bg-blue-50 sm:w-auto sm:min-w-36 sm:max-w-52"
           onClick={() => onOpenChange(!isOpen)}
           aria-expanded={isOpen}
           aria-haspopup="listbox"
