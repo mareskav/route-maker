@@ -1,5 +1,5 @@
-import { Check, ChevronDown, Search } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { Check, ChevronDown, HelpCircle, Search } from "lucide-react"
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react"
 import type { Dispatch, KeyboardEvent } from "react"
 
 import { PlaceSearch } from "@/components/layout/PlaceSearch"
@@ -7,12 +7,19 @@ import { MapMenu } from "@/components/maps/MapMenu"
 import { RouteMenu } from "@/components/routes/RouteMenu"
 import { Menubar } from "@/components/ui/menubar"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { helpGuideButtonLabels } from "@/lib/helpGuideLabels"
 import type { Language } from "@/lib/i18n"
 import { languageFlagCountries, languageLabels, languages, translations } from "@/lib/i18n"
 import type { PlaceSearchResult } from "@/lib/maps/geocoding"
 import type { BaseMapSet, MapTone } from "@/lib/maps/mapMode"
 
 export type RouteClickMode = "none" | "road" | "free"
+
+const HelpGuideDialog = lazy(() =>
+  import("@/components/layout/HelpGuideDialog").then((module) => ({
+    default: module.HelpGuideDialog
+  }))
+)
 
 type Props = {
   language: Language
@@ -272,6 +279,8 @@ const LanguageSelect = ({
 export const HeaderBar = (props: Props) => {
   const apiKey = import.meta.env.VITE_MAPY_API_KEY as string
   const t = translations[props.language]
+  const [isHelpOpen, setIsHelpOpen] = useState(false)
+  const helpLabel = helpGuideButtonLabels[props.language]
 
   return (
     <header className="sticky top-0 z-[2500] w-full bg-blue-600 text-white shadow-[0_1px_7px_rgba(0,0,0,0.7)]">
@@ -342,7 +351,7 @@ export const HeaderBar = (props: Props) => {
             </Menubar>
           </div>
 
-          <div className="flex shrink-0 items-center gap-6 sm:ml-auto sm:gap-8">
+          <div className="ml-auto flex shrink-0 items-center gap-3 sm:gap-6">
             <PlaceSearch
               apiKey={apiKey}
               language={props.language}
@@ -355,9 +364,29 @@ export const HeaderBar = (props: Props) => {
               language={props.language}
               setLanguage={props.setLanguage}
             />
+
+            <button
+              type="button"
+              className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-blue-950/35 px-2.5 text-sm font-semibold text-white shadow-inner outline-offset-2 hover:bg-blue-950/45 focus:outline-2 focus:outline-white"
+              onClick={() => setIsHelpOpen(true)}
+              aria-label={helpLabel}
+              title={helpLabel}
+            >
+              <HelpCircle className="size-4 shrink-0" />
+              <span className="hidden sm:inline">{helpLabel}</span>
+            </button>
           </div>
         </div>
       </div>
+      {isHelpOpen ? (
+        <Suspense fallback={null}>
+          <HelpGuideDialog
+            language={props.language}
+            open={isHelpOpen}
+            onOpenChange={setIsHelpOpen}
+          />
+        </Suspense>
+      ) : null}
     </header>
   )
 }
