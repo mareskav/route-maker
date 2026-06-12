@@ -79,7 +79,7 @@ const App = () => {
   }, [])
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="app-shell flex flex-col overflow-hidden">
       <HeaderBar
         language={language}
         setLanguage={setLanguage}

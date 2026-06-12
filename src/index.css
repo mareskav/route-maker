@@ -123,6 +123,11 @@
   }
 }
 
+.app-shell {
+  height: 100vh;
+  height: 100dvh;
+}
+
 .loading-shimmer {
   display: block;
   position: relative;
