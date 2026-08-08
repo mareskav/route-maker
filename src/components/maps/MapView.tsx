@@ -182,13 +182,12 @@ export const MapView = (props: Props) => {
 
   const tileUrl = tileJson.tiles[0]
   const attribution = tileJson.attribution ?? ""
+  const routePanelClass = profileLines.length > 0
+    ? (isRoutePanelCollapsed ? "route-panel-collapsed" : "route-panel-expanded")
+    : "route-panel-hidden"
 
   return (
-    <div
-      className={`relative h-full w-full ${
-        isRoutePanelCollapsed ? "route-panel-collapsed" : "route-panel-expanded"
-      }`}
-    >
+    <div className={`relative h-full w-full ${routePanelClass}`}>
       <MapContainer center={CENTER} zoom={ZOOM} className="h-full w-full">
         <MapInstance onReady={handleMapReady} />
         <MapPanes />

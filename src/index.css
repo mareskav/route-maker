@@ -172,9 +172,14 @@
   cursor: crosshair;
 }
 
+.route-panel-hidden .leaflet-bottom {
+  --map-control-bottom-gap: 8px;
+  bottom: env(safe-area-inset-bottom) !important;
+}
+
 .route-panel-collapsed .leaflet-bottom {
-  --map-control-bottom-gap: 6px;
-  bottom: calc(96px + env(safe-area-inset-bottom)) !important;
+  --map-control-bottom-gap: 8px;
+  bottom: calc(84px + env(safe-area-inset-bottom)) !important;
 }
 
 .route-panel-expanded .leaflet-bottom {
@@ -185,7 +190,7 @@
 @media (min-width: 640px) {
   .route-panel-collapsed .leaflet-bottom {
     --map-control-bottom-gap: 8px;
-    bottom: 64px !important;
+    bottom: 48px !important;
   }
 }
 
