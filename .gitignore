@@ -12,6 +12,7 @@ dist
 dist-ssr
 .wrangler
 *.local
+.claude
 .env
 
 # Editor directories and files
